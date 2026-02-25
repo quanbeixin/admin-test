@@ -1,8 +1,15 @@
 import axios from 'axios';
 
+// api地址调整
+const baseURL =
+  import.meta.env.MODE === "development"
+    ? "http://localhost:3000"
+    : "https://admin-test-green.vercel.app"
+  ;
+
 // 创建 axios 实例
 const request = axios.create({
-  baseURL: 'http://localhost:3000/api', // 修改为你的 API 地址
+  baseURL: baseURL, // 修改为你的 API 地址
   timeout: 10000,
   headers: {
     'Content-Type': 'application/json',
