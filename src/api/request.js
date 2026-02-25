@@ -1,15 +1,14 @@
 import axios from 'axios';
 
-// api地址调整
+// 开发环境用相对路径 /api，由 Vite proxy 转发；生产环境用完整地址
 const baseURL =
-  import.meta.env.MODE === "development"
-    ? "http://localhost:3000"
-    : "https://admin-test-green.vercel.app/api"
-  ;
+  import.meta.env.MODE === 'development'
+    ? '/api'
+    : 'https://admin-test-green.vercel.app/api';
 
 // 创建 axios 实例
 const request = axios.create({
-  baseURL: baseURL, // 修改为你的 API 地址
+  baseURL,
   withCredentials: true, // 支持发送 cookie
   timeout: 10000,
   headers: {
