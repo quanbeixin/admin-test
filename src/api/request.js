@@ -4,7 +4,7 @@ import axios from 'axios';
 const baseURL =
   import.meta.env.MODE === "development"
     ? "http://localhost:3000"
-    : "https://admin-test-green.vercel.app"
+    : "https://admin-test-green.vercel.app/api"
   ;
 
 // 创建 axios 实例
