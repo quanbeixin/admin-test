@@ -10,6 +10,7 @@ const baseURL =
 // 创建 axios 实例
 const request = axios.create({
   baseURL: baseURL, // 修改为你的 API 地址
+  withCredentials: true, // 支持发送 cookie
   timeout: 10000,
   headers: {
     'Content-Type': 'application/json',
