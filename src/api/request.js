@@ -1,10 +1,7 @@
 import axios from 'axios';
 
-// 开发环境用相对路径 /api，由 Vite proxy 转发；生产环境用完整地址
-const baseURL =
-  import.meta.env.MODE === 'development'
-    ? '/api'
-    : 'https://admin-test-green.vercel.app/api';
+// 从环境变量读取 API 地址
+const baseURL = import.meta.env.VITE_API_BASE_URL || '/api';
 
 // 创建 axios 实例
 const request = axios.create({
