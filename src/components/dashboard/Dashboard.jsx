@@ -9,6 +9,7 @@ import ChartPie from './ChartPie';
 import DataTable from './DataTable';
 import ChartManager from './ChartManager';
 import { getDashboard, updateDashboard, getFields } from '../../api/dashboard';
+import { getAdReportsStats } from '../../api/adReport';
 import mockData from '../../data/mockData.json';
 import 'react-grid-layout/css/styles.css';
 import 'react-resizable/css/styles.css';
@@ -53,8 +54,26 @@ const Dashboard = () => {
       const response = await getDashboard(id);
       const data = response.data;
 
-      // 如果后端没有返回数据，使用 mockData
-      if (!data.config?.data || data.config.data.length === 0) {
+      // 加载真实的广告数据
+      try {
+        const adDataResponse = await getAdReportsStats({
+          limit: 30
+        });
+
+        if (adDataResponse.data && adDataResponse.data.length > 0) {
+          data.config = {
+            ...data.config,
+            data: adDataResponse.data
+          };
+        } else {
+          // 如果没有数据，使用 mockData
+          data.config = {
+            ...data.config,
+            data: mockData
+          };
+        }
+      } catch (adError) {
+        console.error('加载广告数据失败，使用 mockData:', adError);
         data.config = {
           ...data.config,
           data: mockData

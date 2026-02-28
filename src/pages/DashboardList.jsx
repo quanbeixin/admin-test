@@ -3,6 +3,7 @@ import { Card, Button, Table, Space, Modal, Form, Input, message, Popconfirm, Se
 import { PlusOutlined, DeleteOutlined, EyeOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import { getDashboards, createDashboard, deleteDashboard, getFields } from '../api/dashboard';
+import { getAdReportsStats } from '../api/adReport';
 import mockData from '../data/mockData.json';
 
 const DashboardList = () => {
@@ -69,15 +70,32 @@ const DashboardList = () => {
           type: chart.type,
           title: chart.title,
           xField: chart.xField || 'date',
-          yField: chart.yField || 'sales',
+          yField: chart.yField || 'spent_amount',
           yLabel: chart.yLabel || '数值',
-          categoryField: chart.categoryField || 'category',
-          valueField: chart.valueField || 'sales',
-          fields: chart.fields || [],
-          fieldLabels: chart.fieldLabels || {},
+          categoryField: chart.categoryField || 'campaign_name',
+          valueField: chart.valueField || 'spent_amount',
+          fields: chart.fields || ['date', 'spent_amount', 'clicks', 'installs', 'subscriptions'],
+          fieldLabels: chart.fieldLabels || {
+            date: '日期',
+            spent_amount: '已花金额',
+            clicks: '点击量',
+            installs: '应用安装',
+            subscriptions: '订阅次数'
+          },
           color: chart.color || '#5470c6'
         };
       });
+
+      // 尝试加载真实数据
+      let dashboardData = mockData;
+      try {
+        const adDataResponse = await getAdReportsStats({ limit: 30 });
+        if (adDataResponse.data && adDataResponse.data.length > 0) {
+          dashboardData = adDataResponse.data;
+        }
+      } catch (error) {
+        console.error('加载广告数据失败，使用 mockData:', error);
+      }
 
       await createDashboard({
         name: values.name,
@@ -85,7 +103,7 @@ const DashboardList = () => {
         layout: layout,
         config: {
           charts: chartsConfig,
-          data: mockData  // 使用 mockData 作为默认数据
+          data: dashboardData
         }
       });
 
@@ -107,16 +125,17 @@ const DashboardList = () => {
       type: type,
       title: chartTypes.find(t => t.value === type)?.label || '图表',
       xField: 'date',
-      yField: type === 'bar' ? 'sales' : 'profit',
-      yLabel: type === 'bar' ? '销售额' : '利润',
-      categoryField: 'category',
-      valueField: 'sales',
-      fields: ['date', 'sales', 'profit', 'category'],
+      yField: type === 'bar' ? 'spent_amount' : 'clicks',
+      yLabel: type === 'bar' ? '已花金额' : '点击量',
+      categoryField: 'campaign_name',
+      valueField: 'spent_amount',
+      fields: ['date', 'spent_amount', 'clicks', 'installs', 'subscriptions'],
       fieldLabels: {
         date: '日期',
-        sales: '销售额',
-        profit: '利润',
-        category: '分类'
+        spent_amount: '已花金额',
+        clicks: '点击量',
+        installs: '应用安装',
+        subscriptions: '订阅次数'
       }
     };
     setSelectedCharts([...selectedCharts, newChart]);
@@ -220,6 +239,14 @@ const DashboardList = () => {
     if (currentStep === 1) {
       return (
         <div>
+          {/* 隐藏字段保留第一步的数据 */}
+          <Form.Item name="name" hidden>
+            <Input />
+          </Form.Item>
+          <Form.Item name="description" hidden>
+            <Input />
+          </Form.Item>
+
           <div style={{ marginBottom: 16 }}>
             <h4>选择图表类型</h4>
             <Space wrap>
