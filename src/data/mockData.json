@@ -1,0 +1,182 @@
+[
+  {
+    "date": "2026-01-30",
+    "sales": 12500,
+    "profit": 3750,
+    "category": "电子产品"
+  },
+  {
+    "date": "2026-01-31",
+    "sales": 15200,
+    "profit": 4560,
+    "category": "服装"
+  },
+  {
+    "date": "2026-02-01",
+    "sales": 9800,
+    "profit": 2940,
+    "category": "食品"
+  },
+  {
+    "date": "2026-02-02",
+    "sales": 18600,
+    "profit": 5580,
+    "category": "电子产品"
+  },
+  {
+    "date": "2026-02-03",
+    "sales": 14300,
+    "profit": 4290,
+    "category": "服装"
+  },
+  {
+    "date": "2026-02-04",
+    "sales": 11200,
+    "profit": 3360,
+    "category": "食品"
+  },
+  {
+    "date": "2026-02-05",
+    "sales": 16800,
+    "profit": 5040,
+    "category": "电子产品"
+  },
+  {
+    "date": "2026-02-06",
+    "sales": 13500,
+    "profit": 4050,
+    "category": "服装"
+  },
+  {
+    "date": "2026-02-07",
+    "sales": 10900,
+    "profit": 3270,
+    "category": "食品"
+  },
+  {
+    "date": "2026-02-08",
+    "sales": 19200,
+    "profit": 5760,
+    "category": "电子产品"
+  },
+  {
+    "date": "2026-02-09",
+    "sales": 15600,
+    "profit": 4680,
+    "category": "服装"
+  },
+  {
+    "date": "2026-02-10",
+    "sales": 12100,
+    "profit": 3630,
+    "category": "食品"
+  },
+  {
+    "date": "2026-02-11",
+    "sales": 17400,
+    "profit": 5220,
+    "category": "电子产品"
+  },
+  {
+    "date": "2026-02-12",
+    "sales": 14800,
+    "profit": 4440,
+    "category": "服装"
+  },
+  {
+    "date": "2026-02-13",
+    "sales": 11600,
+    "profit": 3480,
+    "category": "食品"
+  },
+  {
+    "date": "2026-02-14",
+    "sales": 20100,
+    "profit": 6030,
+    "category": "电子产品"
+  },
+  {
+    "date": "2026-02-15",
+    "sales": 16200,
+    "profit": 4860,
+    "category": "服装"
+  },
+  {
+    "date": "2026-02-16",
+    "sales": 12800,
+    "profit": 3840,
+    "category": "食品"
+  },
+  {
+    "date": "2026-02-17",
+    "sales": 18900,
+    "profit": 5670,
+    "category": "电子产品"
+  },
+  {
+    "date": "2026-02-18",
+    "sales": 15400,
+    "profit": 4620,
+    "category": "服装"
+  },
+  {
+    "date": "2026-02-19",
+    "sales": 13200,
+    "profit": 3960,
+    "category": "食品"
+  },
+  {
+    "date": "2026-02-20",
+    "sales": 19500,
+    "profit": 5850,
+    "category": "电子产品"
+  },
+  {
+    "date": "2026-02-21",
+    "sales": 16700,
+    "profit": 5010,
+    "category": "服装"
+  },
+  {
+    "date": "2026-02-22",
+    "sales": 12400,
+    "profit": 3720,
+    "category": "食品"
+  },
+  {
+    "date": "2026-02-23",
+    "sales": 18200,
+    "profit": 5460,
+    "category": "电子产品"
+  },
+  {
+    "date": "2026-02-24",
+    "sales": 15900,
+    "profit": 4770,
+    "category": "服装"
+  },
+  {
+    "date": "2026-02-25",
+    "sales": 11800,
+    "profit": 3540,
+    "category": "食品"
+  },
+  {
+    "date": "2026-02-26",
+    "sales": 20500,
+    "profit": 6150,
+    "category": "电子产品"
+  },
+  {
+    "date": "2026-02-27",
+    "sales": 17100,
+    "profit": 5130,
+    "category": "服装"
+  },
+  {
+    "date": "2026-02-28",
+    "sales": 13600,
+    "profit": 4080,
+    "category": "食品"
+  }
+]

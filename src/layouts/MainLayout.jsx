@@ -9,6 +9,7 @@ import {
   DashboardOutlined,
   ProjectOutlined,
   CheckSquareOutlined,
+  BarChartOutlined,
 } from '@ant-design/icons';
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
 import { logout } from '../api/user';
@@ -28,6 +29,11 @@ const MainLayout = () => {
       key: '/workbench',
       icon: <DashboardOutlined />,
       label: '工作台',
+    },
+    {
+      key: '/dashboard-list',
+      icon: <BarChartOutlined />,
+      label: '数据仪表盘',
     },
     {
       key: '/projects',

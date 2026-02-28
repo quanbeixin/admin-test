@@ -5,6 +5,8 @@ import Projects from '../pages/Projects';
 import Users from '../pages/Users';
 import Tasks from '../pages/Tasks';
 import Settings from '../pages/Settings';
+import DashboardList from '../pages/DashboardList';
+import DashboardPage from '../pages/DashboardPage';
 import Login from '../pages/Login';
 import ErrorPage from '../components/ErrorPage';
 import PrivateRoute from '../components/PrivateRoute';
@@ -31,6 +33,14 @@ const router = createBrowserRouter([
       {
         path: 'workbench',
         element: <Workbench />,
+      },
+      {
+        path: 'dashboard-list',
+        element: <DashboardList />,
+      },
+      {
+        path: 'dashboard/:id',
+        element: <DashboardPage />,
       },
       {
         path: 'projects',
