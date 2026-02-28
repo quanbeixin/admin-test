@@ -7,6 +7,8 @@ import Tasks from '../pages/Tasks';
 import Settings from '../pages/Settings';
 import DashboardList from '../pages/DashboardList';
 import DashboardPage from '../pages/DashboardPage';
+import AdCreativeList from '../pages/AdCreativeList';
+import OptionFieldList from '../pages/OptionFieldList';
 import Login from '../pages/Login';
 import ErrorPage from '../components/ErrorPage';
 import PrivateRoute from '../components/PrivateRoute';
@@ -41,6 +43,14 @@ const router = createBrowserRouter([
       {
         path: 'dashboard/:id',
         element: <DashboardPage />,
+      },
+      {
+        path: 'ad-creatives',
+        element: <AdCreativeList />,
+      },
+      {
+        path: 'option-fields',
+        element: <OptionFieldList />,
       },
       {
         path: 'projects',

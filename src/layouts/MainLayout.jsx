@@ -10,6 +10,8 @@ import {
   ProjectOutlined,
   CheckSquareOutlined,
   BarChartOutlined,
+  FileImageOutlined,
+  AppstoreOutlined,
 } from '@ant-design/icons';
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
 import { logout } from '../api/user';
@@ -34,6 +36,22 @@ const MainLayout = () => {
       key: '/dashboard-list',
       icon: <BarChartOutlined />,
       label: '数据仪表盘',
+    },
+    {
+      key: '/ad-creatives',
+      icon: <FileImageOutlined />,
+      label: '广告创意',
+    },
+    {
+      key: 'platform-config',
+      icon: <AppstoreOutlined />,
+      label: '平台配置',
+      children: [
+        {
+          key: '/option-fields',
+          label: '选型字段管理',
+        },
+      ],
     },
     {
       key: '/projects',
