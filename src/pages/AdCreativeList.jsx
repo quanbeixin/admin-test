@@ -36,7 +36,7 @@ import {
   deleteAdCreative,
   batchDeleteAdCreatives
 } from '../api/adCreative';
-import { uploadFile } from '../api/upload';
+import { uploadFileDirectly } from '../api/ossUpload';
 
 const { Search } = Input;
 const { TextArea } = Input;
@@ -211,16 +211,14 @@ const AdCreativeList = () => {
     }
   };
 
-  // 自定义上传处理
+  // 自定义上传处理 - 直接上传到OSS
   const handleUpload = async (file, type) => {
     setUploading(true);
     try {
-      const response = await uploadFile(file);
-      // 检查返回的URL是否已经是完整URL
-      const returnedUrl = response.data.url;
-      const fileUrl = returnedUrl.startsWith('http')
-        ? returnedUrl
-        : `${import.meta.env.VITE_BACKEND_URL || 'http://localhost:3000'}${returnedUrl}`;
+      // 直接上传到OSS，带进度回调
+      const fileUrl = await uploadFileDirectly(file, (progress) => {
+        console.log(`上传进度: ${progress}%`);
+      });
 
       // 更新表单字段
       if (type === 'cover') {
@@ -232,7 +230,8 @@ const AdCreativeList = () => {
       message.success('上传成功');
       return fileUrl;
     } catch (error) {
-      message.error('上传失败');
+      console.error('上传失败:', error);
+      message.error('上传失败: ' + (error.message || '未知错误'));
       throw error;
     } finally {
       setUploading(false);
