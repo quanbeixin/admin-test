@@ -1,0 +1,11 @@
+// 在 startPolling 函数后添加这个函数
+// 大约在第 243 行之后
+
+// 计算执行时长
+const calculateDuration = (startTime, endTime) => {
+  if (!startTime || !endTime) return '-';
+  const start = new Date(startTime);
+  const end = new Date(endTime);
+  const diff = (end - start) / 1000; // 转换为秒
+  return `${diff.toFixed(2)}s`;
+};

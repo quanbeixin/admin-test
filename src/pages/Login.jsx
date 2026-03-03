@@ -149,7 +149,7 @@ const Login = () => {
           </Form.Item>
 
           <Form.Item>
-            <Button type="primary" htmlType="submit" block loading={loading}>
+            <Button id='loginBtn' type="primary" htmlType="submit" block loading={loading}>
               登录
             </Button>
           </Form.Item>

@@ -216,9 +216,11 @@ const AdCreativeList = () => {
     setUploading(true);
     try {
       const response = await uploadFile(file);
-      // 构建完整的文件访问 URL（直接指向后端服务器）
-      const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3000';
-      const fileUrl = `${backendUrl}${response.data.url}`;
+      // 检查返回的URL是否已经是完整URL
+      const returnedUrl = response.data.url;
+      const fileUrl = returnedUrl.startsWith('http')
+        ? returnedUrl
+        : `${import.meta.env.VITE_BACKEND_URL || 'http://localhost:3000'}${returnedUrl}`;
 
       // 更新表单字段
       if (type === 'cover') {
@@ -281,30 +283,49 @@ const AdCreativeList = () => {
       dataIndex: 'cover_url',
       key: 'cover_url',
       width: 80,
-      render: (url) => url ? (
-        <Image
-          src={url}
-          width={60}
-          height={60}
-          style={{ objectFit: 'cover', borderRadius: 4 }}
-          fallback="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='60'%3E%3Crect width='60' height='60' fill='%23f0f0f0'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='Arial' font-size='12' fill='%23999'%3E加载失败%3C/text%3E%3C/svg%3E"
-          preview={true}
-        />
-      ) : (
-        <div style={{
-          width: 60,
-          height: 60,
-          background: '#fafafa',
-          borderRadius: 4,
-          border: '1px dashed #d9d9d9',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          color: '#bfbfbf'
-        }}>
-          <FileImageOutlined style={{ fontSize: 24 }} />
-        </div>
-      )
+      render: (url) => {
+        if (!url) {
+          return (
+            <div style={{
+              width: 60,
+              height: 60,
+              background: '#fafafa',
+              borderRadius: 4,
+              border: '1px dashed #d9d9d9',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              color: '#bfbfbf'
+            }}>
+              <FileImageOutlined style={{ fontSize: 24 }} />
+            </div>
+          );
+        }
+
+        // 处理URL：修复可能的重复拼接问题
+        let imageUrl = url;
+
+        // 检测并修复重复拼接的URL（如：http://localhost:3000http://...）
+        const duplicatePattern = /^https?:\/\/[^\/]+https?:\/\//;
+        if (duplicatePattern.test(url)) {
+          // 提取第二个http://之后的部分
+          imageUrl = url.replace(/^https?:\/\/[^\/]+(?=https?:\/\/)/, '');
+        } else if (!url.startsWith('http')) {
+          // 如果是相对路径，拼接后端地址
+          imageUrl = `${import.meta.env.VITE_BACKEND_URL || 'http://localhost:3000'}${url}`;
+        }
+
+        return (
+          <Image
+            src={imageUrl}
+            width={60}
+            height={60}
+            style={{ objectFit: 'cover', borderRadius: 4 }}
+            fallback="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='60'%3E%3Crect width='60' height='60' fill='%23f0f0f0'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='Arial' font-size='12' fill='%23999'%3E加载失败%3C/text%3E%3C/svg%3E"
+            preview={true}
+          />
+        );
+      }
     },
     {
       title: '主题',

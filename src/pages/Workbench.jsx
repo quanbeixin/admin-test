@@ -220,7 +220,7 @@ const Workbench = () => {
   );
 
   return (
-    <div style={{ padding: '24px' }}>
+    <div style={{ padding: '24px' }} data-testid="dashboard">
       <Space direction="vertical" size="large" style={{ width: '100%' }}>
         {/* 今日工作事项 */}
         <Card

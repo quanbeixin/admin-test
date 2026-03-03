@@ -9,6 +9,10 @@ import DashboardList from '../pages/DashboardList';
 import DashboardPage from '../pages/DashboardPage';
 import AdCreativeList from '../pages/AdCreativeList';
 import OptionFieldList from '../pages/OptionFieldList';
+import AutomatedTest from '../pages/AutomatedTest';
+import TestCaseManagement from '../pages/TestCaseManagement';
+import TestTaskList from '../pages/TestTaskList';
+import TestTaskDetail from '../pages/TestTaskDetail';
 import Login from '../pages/Login';
 import ErrorPage from '../components/ErrorPage';
 import PrivateRoute from '../components/PrivateRoute';
@@ -63,6 +67,22 @@ const router = createBrowserRouter([
       {
         path: 'users',
         element: <Users />,
+      },
+      {
+        path: 'automated-test',
+        element: <AutomatedTest />,
+      },
+      {
+        path: 'test-case-management',
+        element: <TestCaseManagement />,
+      },
+      {
+        path: 'test-tasks',
+        element: <TestTaskList />,
+      },
+      {
+        path: 'test-task/:id',
+        element: <TestTaskDetail />,
       },
       {
         path: 'settings',

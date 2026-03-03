@@ -12,6 +12,9 @@ import {
   BarChartOutlined,
   FileImageOutlined,
   AppstoreOutlined,
+  ExperimentOutlined,
+  FileTextOutlined,
+  UnorderedListOutlined,
 } from '@ant-design/icons';
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
 import { logout } from '../api/user';
@@ -67,6 +70,28 @@ const MainLayout = () => {
       key: '/users',
       icon: <UserOutlined />,
       label: '用户管理',
+    },
+    {
+      key: 'automated-test-menu',
+      icon: <ExperimentOutlined />,
+      label: '自动化测试',
+      children: [
+        {
+          key: '/automated-test',
+          icon: <ExperimentOutlined />,
+          label: '测试概览',
+        },
+        {
+          key: '/test-case-management',
+          icon: <FileTextOutlined />,
+          label: '测试用例管理',
+        },
+        {
+          key: '/test-tasks',
+          icon: <UnorderedListOutlined />,
+          label: '测试任务列表',
+        },
+      ],
     },
     {
       key: '/settings',
