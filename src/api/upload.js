@@ -8,7 +8,8 @@ export const uploadFile = (file) => {
   return request.post('/upload/single', formData, {
     headers: {
       'Content-Type': 'multipart/form-data'
-    }
+    },
+    timeout: 60000 // 上传文件超时时间设置为60秒
   });
 };
 
@@ -22,6 +23,7 @@ export const uploadMultiple = (files) => {
   return request.post('/upload/multiple', formData, {
     headers: {
       'Content-Type': 'multipart/form-data'
-    }
+    },
+    timeout: 60000 // 上传文件超时时间设置为60秒
   });
 };
