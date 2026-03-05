@@ -46,17 +46,6 @@ const MainLayout = () => {
       label: '广告创意',
     },
     {
-      key: 'platform-config',
-      icon: <AppstoreOutlined />,
-      label: '平台配置',
-      children: [
-        {
-          key: '/option-fields',
-          label: '选型字段管理',
-        },
-      ],
-    },
-    {
       key: '/projects',
       icon: <ProjectOutlined />,
       label: '项目管理',
