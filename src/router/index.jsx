@@ -8,6 +8,8 @@ import Settings from '../pages/Settings';
 import DashboardList from '../pages/DashboardList';
 import DashboardPage from '../pages/DashboardPage';
 import AdCreativeList from '../pages/AdCreativeList';
+import AdData from '../pages/AdData';
+import AdDataTable from '../pages/AdDataTable';
 import PlatformFieldConfig from '../pages/PlatformFieldConfig';
 import AutomatedTest from '../pages/AutomatedTest';
 import TestCaseManagement from '../pages/TestCaseManagement';
@@ -51,6 +53,14 @@ const router = createBrowserRouter([
       {
         path: 'ad-creatives',
         element: <AdCreativeList />,
+      },
+      {
+        path: 'ad-data',
+        element: <AdData />,
+      },
+      {
+        path: 'ad-data-table',
+        element: <AdDataTable />,
       },
       {
         path: 'projects',

@@ -15,6 +15,7 @@ import {
   ExperimentOutlined,
   FileTextOutlined,
   UnorderedListOutlined,
+  LineChartOutlined,
 } from '@ant-design/icons';
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
 import { logout } from '../api/user';
@@ -44,6 +45,17 @@ const MainLayout = () => {
       key: '/ad-creatives',
       icon: <FileImageOutlined />,
       label: '广告创意',
+    },
+    {
+      key: 'ad-data-menu',
+      icon: <LineChartOutlined />,
+      label: '投放数据',
+      children: [
+        {
+          key: '/ad-data-table',
+          label: '投放数据表',
+        },
+      ],
     },
     {
       key: '/projects',
