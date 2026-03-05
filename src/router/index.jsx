@@ -8,6 +8,7 @@ import Settings from '../pages/Settings';
 import DashboardList from '../pages/DashboardList';
 import DashboardPage from '../pages/DashboardPage';
 import AdCreativeList from '../pages/AdCreativeList';
+import PlatformFieldConfig from '../pages/PlatformFieldConfig';
 import AutomatedTest from '../pages/AutomatedTest';
 import TestCaseManagement from '../pages/TestCaseManagement';
 import TestTaskList from '../pages/TestTaskList';
@@ -82,6 +83,10 @@ const router = createBrowserRouter([
       {
         path: 'settings',
         element: <Settings />,
+      },
+      {
+        path: 'platform-field-config',
+        element: <PlatformFieldConfig />,
       },
     ],
   },

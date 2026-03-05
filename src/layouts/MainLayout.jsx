@@ -83,9 +83,19 @@ const MainLayout = () => {
       ],
     },
     {
-      key: '/settings',
+      key: 'settings-menu',
       icon: <SettingOutlined />,
       label: '系统设置',
+      children: [
+        {
+          key: '/settings',
+          label: '系统设置',
+        },
+        {
+          key: '/platform-field-config',
+          label: '平台字段配置',
+        },
+      ],
     },
   ];
 
