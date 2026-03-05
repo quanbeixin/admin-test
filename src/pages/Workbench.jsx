@@ -1,4 +1,4 @@
-import { Card, List, Button, Space, Tag, message, Modal, Form, Input, DatePicker, Select, Checkbox } from 'antd';
+import { Card, Button, Space, Tag, message, Modal, Form, Input, DatePicker, Select, Checkbox, Flex, Empty } from 'antd';
 import { PlusOutlined, EditOutlined, DeleteOutlined, CheckCircleOutlined, ClockCircleOutlined } from '@ant-design/icons';
 import { useState, useEffect } from 'react';
 import dayjs from 'dayjs';
@@ -161,42 +161,29 @@ const Workbench = () => {
 
   // 渲染任务列表项
   const renderTaskItem = (item) => (
-    <List.Item
-      actions={[
-        <Button
-          type="link"
-          icon={<CheckCircleOutlined />}
-          onClick={() => handleToggleStatus(item)}
-        >
-          {item.status === 'completed' ? '重新打开' : '完成'}
-        </Button>,
-        <Button
-          type="link"
-          icon={<EditOutlined />}
-          onClick={() => handleOpenModal(item)}
-        >
-          编辑
-        </Button>,
-        <Button
-          type="link"
-          danger
-          icon={<DeleteOutlined />}
-          onClick={() => handleDelete(item)}
-        >
-          删除
-        </Button>
-      ]}
+    <div
+      key={item.id}
+      style={{
+        padding: '16px',
+        borderBottom: '1px solid #f0f0f0',
+        display: 'flex',
+        alignItems: 'flex-start',
+        gap: '12px'
+      }}
     >
-      <List.Item.Meta
-        avatar={
-          <Checkbox
-            checked={item.status === 'completed'}
-            onChange={() => handleToggleStatus(item)}
-          />
-        }
-        title={
+      <Checkbox
+        checked={item.status === 'completed'}
+        onChange={() => handleToggleStatus(item)}
+        style={{ marginTop: '4px' }}
+      />
+      <div style={{ flex: 1 }}>
+        <div style={{ marginBottom: '8px' }}>
           <Space>
-            <span style={{ textDecoration: item.status === 'completed' ? 'line-through' : 'none' }}>
+            <span style={{
+              textDecoration: item.status === 'completed' ? 'line-through' : 'none',
+              fontSize: '14px',
+              fontWeight: 500
+            }}>
               {item.title}
             </span>
             <Tag color={priorityMap[item.priority].color}>
@@ -206,22 +193,47 @@ const Workbench = () => {
               {statusMap[item.status].text}
             </Tag>
           </Space>
-        }
-        description={
-          <div>
-            <div>{item.description}</div>
-            <div style={{ marginTop: 8, color: '#999', fontSize: 12 }}>
-              <ClockCircleOutlined /> 截止日期: {item.work_date}
-            </div>
-          </div>
-        }
-      />
-    </List.Item>
+        </div>
+        <div style={{ color: '#666', fontSize: '13px', marginBottom: '8px' }}>
+          {item.description}
+        </div>
+        <div style={{ color: '#999', fontSize: '12px' }}>
+          <ClockCircleOutlined /> 截止日期: {item.work_date}
+        </div>
+      </div>
+      <Space>
+        <Button
+          type="link"
+          size="small"
+          icon={<CheckCircleOutlined />}
+          onClick={() => handleToggleStatus(item)}
+        >
+          {item.status === 'completed' ? '重新打开' : '完成'}
+        </Button>
+        <Button
+          type="link"
+          size="small"
+          icon={<EditOutlined />}
+          onClick={() => handleOpenModal(item)}
+        >
+          编辑
+        </Button>
+        <Button
+          type="link"
+          size="small"
+          danger
+          icon={<DeleteOutlined />}
+          onClick={() => handleDelete(item)}
+        >
+          删除
+        </Button>
+      </Space>
+    </div>
   );
 
   return (
     <div style={{ padding: '24px' }} data-testid="dashboard">
-      <Space direction="vertical" size="large" style={{ width: '100%' }}>
+      <Space orientation="vertical" size="large" style={{ width: '100%' }}>
         {/* 今日工作事项 */}
         <Card
           title="今日工作事项"
@@ -235,20 +247,24 @@ const Workbench = () => {
             </Button>
           }
         >
-          <List
-            dataSource={todayTasks}
-            renderItem={renderTaskItem}
-            locale={{ emptyText: '暂无今日工作事项' }}
-          />
+          {todayTasks.length === 0 ? (
+            <Empty description="暂无今日工作事项" />
+          ) : (
+            <div>
+              {todayTasks.map(renderTaskItem)}
+            </div>
+          )}
         </Card>
 
         {/* 待办事项 */}
         <Card title="待办事项">
-          <List
-            dataSource={todoList}
-            renderItem={renderTaskItem}
-            locale={{ emptyText: '暂无待办事项' }}
-          />
+          {todoList.length === 0 ? (
+            <Empty description="暂无待办事项" />
+          ) : (
+            <div>
+              {todoList.map(renderTaskItem)}
+            </div>
+          )}
         </Card>
       </Space>
 
