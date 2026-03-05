@@ -10,6 +10,8 @@ import DashboardPage from '../pages/DashboardPage';
 import AdCreativeList from '../pages/AdCreativeList';
 import AdData from '../pages/AdData';
 import AdDataTable from '../pages/AdDataTable';
+import AdAccountManagement from '../pages/AdAccountManagement';
+import CompanyManagement from '../pages/CompanyManagement';
 import PlatformFieldConfig from '../pages/PlatformFieldConfig';
 import AutomatedTest from '../pages/AutomatedTest';
 import TestCaseManagement from '../pages/TestCaseManagement';
@@ -63,6 +65,10 @@ const router = createBrowserRouter([
         element: <AdDataTable />,
       },
       {
+        path: 'ad-account-management',
+        element: <AdAccountManagement />,
+      },
+      {
         path: 'projects',
         element: <Projects />,
       },
@@ -97,6 +103,10 @@ const router = createBrowserRouter([
       {
         path: 'platform-field-config',
         element: <PlatformFieldConfig />,
+      },
+      {
+        path: 'company-management',
+        element: <CompanyManagement />,
       },
     ],
   },

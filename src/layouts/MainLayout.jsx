@@ -55,6 +55,10 @@ const MainLayout = () => {
           key: '/ad-data-table',
           label: '投放数据表',
         },
+        {
+          key: '/ad-account-management',
+          label: '广告账户管理',
+        },
       ],
     },
     {
@@ -106,6 +110,10 @@ const MainLayout = () => {
         {
           key: '/platform-field-config',
           label: '平台字段配置',
+        },
+        {
+          key: '/company-management',
+          label: '公司主体管理',
         },
       ],
     },
