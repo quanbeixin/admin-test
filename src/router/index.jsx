@@ -12,6 +12,7 @@ import AdData from '../pages/AdData';
 import AdDataTable from '../pages/AdDataTable';
 import AdAccountManagement from '../pages/AdAccountManagement';
 import CompanyManagement from '../pages/CompanyManagement';
+import DataSync from '../pages/DataSync';
 import PlatformFieldConfig from '../pages/PlatformFieldConfig';
 import AutomatedTest from '../pages/AutomatedTest';
 import TestCaseManagement from '../pages/TestCaseManagement';
@@ -67,6 +68,10 @@ const router = createBrowserRouter([
       {
         path: 'ad-account-management',
         element: <AdAccountManagement />,
+      },
+      {
+        path: 'data-sync',
+        element: <DataSync />,
       },
       {
         path: 'projects',

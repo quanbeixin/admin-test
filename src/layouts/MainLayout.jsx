@@ -59,6 +59,10 @@ const MainLayout = () => {
           key: '/ad-account-management',
           label: '广告账户管理',
         },
+        {
+          key: '/data-sync',
+          label: '数据同步',
+        },
       ],
     },
     {

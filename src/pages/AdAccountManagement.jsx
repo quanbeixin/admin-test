@@ -2,13 +2,27 @@ import React, { useState, useEffect } from 'react';
 import { Card, Table, Button, Space, Modal, Form, Input, Select, message, Popconfirm } from 'antd';
 import { PlusOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons';
 import { getAllAccounts, createAccount, updateAccount, deleteAccount } from '../api/fbAdAccount';
+import { getAllCompanies } from '../api/company';
 
 const AdAccountManagement = () => {
   const [data, setData] = useState([]);
+  const [companies, setCompanies] = useState([]);
   const [loading, setLoading] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
   const [editingRecord, setEditingRecord] = useState(null);
   const [form] = Form.useForm();
+
+  // 加载公司列表
+  const loadCompanies = async () => {
+    try {
+      const response = await getAllCompanies();
+      if (response.success) {
+        setCompanies(response.data);
+      }
+    } catch (error) {
+      console.error('加载公司列表失败:', error);
+    }
+  };
 
   // 加载数据
   const loadData = async () => {
@@ -26,6 +40,7 @@ const AdAccountManagement = () => {
   };
 
   useEffect(() => {
+    loadCompanies();
     loadData();
   }, []);
 
@@ -34,6 +49,9 @@ const AdAccountManagement = () => {
     setEditingRecord(record);
     if (record) {
       form.setFieldsValue({
+        company_id: record.company_id,
+        account_id: record.account_id,
+        account_name: record.account_name,
         access_token: record.access_token,
         status: record.status,
       });
@@ -102,11 +120,26 @@ const AdAccountManagement = () => {
       key: 'id',
       width: 80,
     },
-     {
+    {
+      title: '关联公司',
+      dataIndex: 'company_name',
+      key: 'company_name',
+      width: 150,
+      render: (text) => text || '-',
+    },
+    {
+      title: '账户ID',
+      dataIndex: 'account_id',
+      key: 'account_id',
+      width: 250,
+      render: (text) => text || '-',
+    },
+    {
       title: '账户名称',
       dataIndex: 'account_name',
       key: 'account_name',
       width: 150,
+      render: (text) => text || '-',
     },
     {
       title: 'Access Token',
@@ -204,6 +237,38 @@ const AdAccountManagement = () => {
           form={form}
           layout="vertical"
         >
+          <Form.Item
+            label="关联公司"
+            name="company_id"
+          >
+            <Select
+              placeholder="请选择关联公司（可选）"
+              allowClear
+              showSearch
+              optionFilterProp="children"
+            >
+              {companies.map(company => (
+                <Select.Option key={company.id} value={company.id}>
+                  {company.name}
+                </Select.Option>
+              ))}
+            </Select>
+          </Form.Item>
+
+          <Form.Item
+            label="账户ID"
+            name="account_id"
+          >
+            <Input placeholder="请输入 Facebook 账户 ID（可选）" />
+          </Form.Item>
+
+          <Form.Item
+            label="账户名称"
+            name="account_name"
+          >
+            <Input placeholder="请输入账户名称（可选）" />
+          </Form.Item>
+
           <Form.Item
             label="Access Token"
             name="access_token"
