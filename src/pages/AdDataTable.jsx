@@ -211,6 +211,7 @@ const AdDataTable = () => {
       key: 'impressions',
       width: 120,
       align: 'right',
+      sorter: (a, b) => (a.impressions || 0) - (b.impressions || 0),
       render: (value) => value?.toLocaleString() || 0,
     },
     {
@@ -219,6 +220,7 @@ const AdDataTable = () => {
       key: 'clicks',
       width: 120,
       align: 'right',
+      sorter: (a, b) => (a.clicks || 0) - (b.clicks || 0),
       render: (value) => value?.toLocaleString() || 0,
     },
     {
@@ -227,6 +229,7 @@ const AdDataTable = () => {
       key: 'spend',
       width: 120,
       align: 'right',
+      sorter: (a, b) => parseFloat(a.spend || 0) - parseFloat(b.spend || 0),
       render: (value) => `$${parseFloat(value || 0).toFixed(2)}`,
     },
     {
@@ -235,6 +238,7 @@ const AdDataTable = () => {
       key: 'reach',
       width: 120,
       align: 'right',
+      sorter: (a, b) => (a.reach || 0) - (b.reach || 0),
       render: (value) => value?.toLocaleString() || 0,
     },
     {
@@ -243,6 +247,7 @@ const AdDataTable = () => {
       key: 'ctr',
       width: 100,
       align: 'right',
+      sorter: (a, b) => parseFloat(a.ctr || 0) - parseFloat(b.ctr || 0),
       render: (value) => `${parseFloat(value || 0).toFixed(2)}%`,
     },
     {
@@ -251,6 +256,7 @@ const AdDataTable = () => {
       key: 'cpc',
       width: 100,
       align: 'right',
+      sorter: (a, b) => parseFloat(a.cpc || 0) - parseFloat(b.cpc || 0),
       render: (value) => `$${parseFloat(value || 0).toFixed(2)}`,
     },
     {
@@ -259,6 +265,7 @@ const AdDataTable = () => {
       key: 'cpm',
       width: 100,
       align: 'right',
+      sorter: (a, b) => parseFloat(a.cpm || 0) - parseFloat(b.cpm || 0),
       render: (value) => `$${parseFloat(value || 0).toFixed(2)}`,
     },
   ];
