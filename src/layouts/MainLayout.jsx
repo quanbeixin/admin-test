@@ -16,6 +16,8 @@ import {
   FileTextOutlined,
   UnorderedListOutlined,
   LineChartOutlined,
+  ThunderboltOutlined,
+  FireOutlined,
 } from '@ant-design/icons';
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
 import { logout } from '../api/user';
@@ -99,6 +101,23 @@ const MainLayout = () => {
           key: '/test-tasks',
           icon: <UnorderedListOutlined />,
           label: '测试任务列表',
+        },
+      ],
+    },
+    {
+      key: 'trends-menu',
+      icon: <ThunderboltOutlined />,
+      label: '爆点情报台',
+      children: [
+        {
+          key: '/trends-dashboard',
+          icon: <FireOutlined />,
+          label: '热点看板',
+        },
+        {
+          key: '/hot-topic-list',
+          icon: <UnorderedListOutlined />,
+          label: '热点话题列表',
         },
       ],
     },

@@ -18,6 +18,8 @@ import AutomatedTest from '../pages/AutomatedTest';
 import TestCaseManagement from '../pages/TestCaseManagement';
 import TestTaskList from '../pages/TestTaskList';
 import TestTaskDetail from '../pages/TestTaskDetail';
+import TrendsDashboard from '../pages/TrendsDashboard';
+import HotTopicList from '../pages/HotTopicList';
 import Login from '../pages/Login';
 import ErrorPage from '../components/ErrorPage';
 import PrivateRoute from '../components/PrivateRoute';
@@ -112,6 +114,14 @@ const router = createBrowserRouter([
       {
         path: 'company-management',
         element: <CompanyManagement />,
+      },
+      {
+        path: 'trends-dashboard',
+        element: <TrendsDashboard />,
+      },
+      {
+        path: 'hot-topic-list',
+        element: <HotTopicList />,
       },
     ],
   },
