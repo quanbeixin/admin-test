@@ -24,7 +24,7 @@ const columns = [
     title: '最热关键词',
     dataIndex: 'keyword',
     key: 'keyword',
-    width: 150,
+    width: 300,
     render: (val) => <Text strong>{val}</Text>,
   },
   {

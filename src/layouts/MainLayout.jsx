@@ -18,6 +18,7 @@ import {
   LineChartOutlined,
   ThunderboltOutlined,
   FireOutlined,
+  MessageOutlined,
 } from '@ant-design/icons';
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
 import { logout } from '../api/user';
@@ -118,6 +119,18 @@ const MainLayout = () => {
           key: '/hot-topic-list',
           icon: <UnorderedListOutlined />,
           label: '热点话题列表',
+        },
+      ],
+    },
+    {
+      key: 'feedback-menu',
+      icon: <MessageOutlined />,
+      label: '用户反馈',
+      children: [
+        {
+          key: '/feedback-list',
+          icon: <UnorderedListOutlined />,
+          label: '用户问题记录',
         },
       ],
     },

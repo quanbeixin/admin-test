@@ -1,8 +1,9 @@
-import { Form, Input, Button, Checkbox, Card, message, Modal } from 'antd';
+import { Form, Input, Button, Checkbox, message, Modal } from 'antd';
 import { UserOutlined, LockOutlined, MailOutlined } from '@ant-design/icons';
-import { useNavigate, Link } from 'react-router-dom';
-import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useState, useEffect } from 'react';
 import { login, register } from '../api/user';
+import './Login.css';
 
 const Login = () => {
   const navigate = useNavigate();
@@ -11,6 +12,11 @@ const Login = () => {
   const [loading, setLoading] = useState(false);
   const [isRegisterModalOpen, setIsRegisterModalOpen] = useState(false);
   const [registerLoading, setRegisterLoading] = useState(false);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const onFinish = async (values) => {
     setLoading(true);
@@ -20,21 +26,16 @@ const Login = () => {
         password: values.password,
       });
 
-      // 保存 token 和用户信息
       const token = response.token || response.data?.token;
       const userInfo = response.userInfo || response.data?.userInfo;
 
       if (token) {
         localStorage.setItem('token', token);
-
-        // 保存用户信息，如果后端没有返回完整的 userInfo，至少保存用户名
         if (userInfo) {
           localStorage.setItem('userInfo', JSON.stringify(userInfo));
         } else {
-          // 如果后端没有返回 userInfo，使用登录时输入的用户名
           localStorage.setItem('userInfo', JSON.stringify({ username: values.username }));
         }
-
         message.success('登录成功！');
         navigate('/');
       } else {
@@ -48,18 +49,15 @@ const Login = () => {
     }
   };
 
-  // 打开注册弹窗
   const handleOpenRegister = () => {
     setIsRegisterModalOpen(true);
   };
 
-  // 关闭注册弹窗
   const handleCancelRegister = () => {
     setIsRegisterModalOpen(false);
     registerForm.resetFields();
   };
 
-  // 提交注册
   const handleRegisterSubmit = async () => {
     setRegisterLoading(true);
     try {
@@ -69,7 +67,6 @@ const Login = () => {
         email: values.email,
         password: values.password,
       });
-
       message.success('注册成功！请登录');
       setIsRegisterModalOpen(false);
       registerForm.resetFields();
@@ -86,157 +83,94 @@ const Login = () => {
   };
 
   return (
-    <div style={{
-      display: 'flex',
-      justifyContent: 'center',
-      alignItems: 'center',
-      minHeight: '100vh',
-      background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-    }}>
-      <Card
-        style={{
-          width: 400,
-          boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
-        }}
-      >
-        <div style={{
-          textAlign: 'center',
-          marginBottom: 24,
-        }}>
-          <h1 style={{ fontSize: 28, marginBottom: 8 }}>项目管理系统</h1>
-          <p style={{ color: '#666' }}>欢迎登录</p>
+    <div className="login-container">
+      <div className="login-background">
+        <div className="gradient-orb orb-1"></div>
+        <div className="gradient-orb orb-2"></div>
+        <div className="gradient-orb orb-3"></div>
+      </div>
+
+      <div className={`login-card ${mounted ? 'mounted' : ''}`}>
+        <div className="login-card-glow"></div>
+
+        <div className="login-header">
+          <div className="logo-container">
+            <svg viewBox="0 0 48 48" fill="none">
+              <path d="M24 4L8 12L24 20L40 12L24 4Z" stroke="url(#logo-gradient)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
+              <path d="M8 28L24 36L40 28" stroke="url(#logo-gradient)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
+              <path d="M8 20L24 28L40 20" stroke="url(#logo-gradient)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
+              <defs>
+                <linearGradient id="logo-gradient" x1="8" y1="4" x2="40" y2="36" gradientUnits="userSpaceOnUse">
+                  <stop stopColor="#60a5fa"/>
+                  <stop offset="1" stopColor="#a78bfa"/>
+                </linearGradient>
+              </defs>
+            </svg>
+          </div>
+          <h1 className="login-title">后台管理系统</h1>
+          <p className="login-subtitle">欢迎回来，请登录您的账户</p>
         </div>
 
-        <Form
-          form={form}
-          name="login"
-          onFinish={onFinish}
-          autoComplete="off"
-          size="large"
-        >
-          <Form.Item
-            name="username"
-            rules={[
-              { required: true, message: '请输入用户名！' },
-            ]}
-          >
-            <Input
-              prefix={<UserOutlined />}
-              placeholder="用户名"
-            />
+        <Form form={form} name="login" onFinish={onFinish} autoComplete="off" className="login-form">
+          <Form.Item name="username" rules={[{ required: true, message: '请输入用户名！' }]}>
+            <div className="input-wrapper">
+              <Input prefix={<UserOutlined className="input-icon" />} placeholder="用户名" size="large" className="custom-input" />
+            </div>
           </Form.Item>
 
-          <Form.Item
-            name="password"
-            rules={[
-              { required: true, message: '请输入密码！' },
-              { min: 6, message: '密码至少6位！' },
-            ]}
-          >
-            <Input.Password
-              prefix={<LockOutlined />}
-              placeholder="密码"
-            />
-          </Form.Item>
-
-          <Form.Item>
-            <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-              <Form.Item name="remember" valuePropName="checked" noStyle>
-                <Checkbox>记住我</Checkbox>
-              </Form.Item>
-              <a href="#" style={{ color: '#1890ff' }}>忘记密码？</a>
+          <Form.Item name="password" rules={[{ required: true, message: '请输入密码！' }, { min: 6, message: '密码至少6位！' }]}>
+            <div className="input-wrapper">
+              <Input.Password prefix={<LockOutlined className="input-icon" />} placeholder="密码" size="large" className="custom-input" />
             </div>
           </Form.Item>
 
           <Form.Item>
-            <Button id='loginBtn' type="primary" htmlType="submit" block loading={loading}>
-              登录
+            <div className="form-options">
+              <Form.Item name="remember" valuePropName="checked" noStyle>
+                <Checkbox className="custom-checkbox">记住我</Checkbox>
+              </Form.Item>
+              <a href="#" className="forgot-link">忘记密码？</a>
+            </div>
+          </Form.Item>
+
+          <Form.Item>
+            <Button id="loginBtn" type="primary" htmlType="submit" block loading={loading} size="large" className="login-button">
+              <span>登录</span>
             </Button>
           </Form.Item>
 
-          <div style={{ textAlign: 'center', color: '#666' }}>
-            还没有账号？ <a onClick={handleOpenRegister} style={{ color: '#1890ff', cursor: 'pointer' }}>立即注册</a>
+          <div className="register-prompt">
+            还没有账号？ <a onClick={handleOpenRegister} className="register-link">立即注册</a>
           </div>
         </Form>
-      </Card>
+      </div>
 
       <Modal
-        title="用户注册"
+        title={<span className="modal-title">用户注册</span>}
         open={isRegisterModalOpen}
         onOk={handleRegisterSubmit}
         onCancel={handleCancelRegister}
         okText="注册"
         cancelText="取消"
         confirmLoading={registerLoading}
+        className="register-modal"
+        centered
       >
-        <Form
-          form={registerForm}
-          layout="vertical"
-          autoComplete="off"
-        >
-          <Form.Item
-            label="用户名"
-            name="username"
-            rules={[
-              { required: true, message: '请输入用户名！' },
-              { min: 1, message: '用户名至少1位！' },
-              { max: 20, message: '用户名最多20位！' },
-            ]}
-          >
-            <Input
-              prefix={<UserOutlined />}
-              placeholder="请输入用户名"
-            />
+        <Form form={registerForm} layout="vertical" autoComplete="off" className="register-form">
+          <Form.Item label="用户名" name="username" rules={[{ required: true, message: '请输入用户名！' }, { min: 1, message: '用户名至少1位！' }, { max: 20, message: '用户名最多20位！' }]}>
+            <Input prefix={<UserOutlined />} placeholder="请输入用户名" size="large" />
           </Form.Item>
 
-          <Form.Item
-            label="邮箱"
-            name="email"
-            rules={[
-              { required: true, message: '请输入邮箱！' },
-              { type: 'email', message: '请输入有效的邮箱地址！' },
-            ]}
-          >
-            <Input
-              prefix={<MailOutlined />}
-              placeholder="请输入邮箱"
-            />
+          <Form.Item label="邮箱" name="email" rules={[{ required: true, message: '请输入邮箱！' }, { type: 'email', message: '请输入有效的邮箱地址！' }]}>
+            <Input prefix={<MailOutlined />} placeholder="请输入邮箱" size="large" />
           </Form.Item>
 
-          <Form.Item
-            label="密码"
-            name="password"
-            rules={[
-              { required: true, message: '请输入密码！' },
-              { min: 6, message: '密码至少6位！' },
-            ]}
-          >
-            <Input.Password
-              prefix={<LockOutlined />}
-              placeholder="请输入密码"
-            />
+          <Form.Item label="密码" name="password" rules={[{ required: true, message: '请输入密码！' }, { min: 6, message: '密码至少6位！' }]}>
+            <Input.Password prefix={<LockOutlined />} placeholder="请输入密码" size="large" />
           </Form.Item>
 
-          <Form.Item
-            label="确认密码"
-            name="confirmPassword"
-            dependencies={['password']}
-            rules={[
-              { required: true, message: '请确认密码！' },
-              ({ getFieldValue }) => ({
-                validator(_, value) {
-                  if (!value || getFieldValue('password') === value) {
-                    return Promise.resolve();
-                  }
-                  return Promise.reject(new Error('两次输入的密码不一致！'));
-                },
-              }),
-            ]}
-          >
-            <Input.Password
-              prefix={<LockOutlined />}
-              placeholder="请再次输入密码"
-            />
+          <Form.Item label="确认密码" name="confirmPassword" dependencies={['password']} rules={[{ required: true, message: '请确认密码！' }, ({ getFieldValue }) => ({ validator(_, value) { if (!value || getFieldValue('password') === value) { return Promise.resolve(); } return Promise.reject(new Error('两次输入的密码不一致！')); } })]}>
+            <Input.Password prefix={<LockOutlined />} placeholder="请再次输入密码" size="large" />
           </Form.Item>
         </Form>
       </Modal>
