@@ -661,7 +661,7 @@ const FeedbackList = () => {
       />
 
       <Modal
-        title="插入模拟数据"
+        title="手动插入数据"
         open={isMockModalOpen}
         onOk={handleMockInsert}
         onCancel={() => {
