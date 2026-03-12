@@ -1,5 +1,5 @@
-import { Table, Button, Space, Tag, message, Modal, Form, Input, Select, DatePicker, Drawer, Tabs, Upload } from 'antd';
-import { EyeOutlined, EditOutlined, DeleteOutlined, CheckOutlined, RobotOutlined, ThunderboltOutlined, CopyOutlined, UploadOutlined } from '@ant-design/icons';
+import { Table, Button, Space, Tag, message, Modal, Form, Input, Select, DatePicker, Drawer, Tabs, Upload, Dropdown, Card } from 'antd';
+import { EyeOutlined, EditOutlined, DeleteOutlined, CheckOutlined, RobotOutlined, ThunderboltOutlined, CopyOutlined, UploadOutlined, SettingOutlined } from '@ant-design/icons';
 import { useState, useEffect, useMemo } from 'react';
 import dayjs from 'dayjs';
 import * as XLSX from 'xlsx';
@@ -22,6 +22,17 @@ const FeedbackList = () => {
   const [editingFeedback, setEditingFeedback] = useState(null);
   const [viewingFeedback, setViewingFeedback] = useState(null);
   const [activeTab, setActiveTab] = useState('all');
+  const [visibleColumns, setVisibleColumns] = useState([
+    'date', 'user_email', 'product', 'user_question', 'user_question_cn',
+    'ai_reply', 'ai_reply_en', 'ai_category', 'ai_sentiment', 'ai_processed',
+    'is_new_request', 'status', 'action'
+  ]);
+  const [filters, setFilters] = useState({
+    dateRange: null,
+    product: null,
+    status: null,
+    isNewRequest: null
+  });
   const [form] = Form.useForm();
   const [mockForm] = Form.useForm();
 
@@ -41,12 +52,33 @@ const FeedbackList = () => {
       tabs.push({ key: product, label: product, count });
     });
 
-    const filtered = activeTab === 'all'
+    // 先按 tab 过滤
+    let filtered = activeTab === 'all'
       ? feedbackList
       : feedbackList.filter(item => item.product === activeTab);
 
+    // 再应用筛选条件
+    if (filters.dateRange && filters.dateRange.length === 2) {
+      filtered = filtered.filter(item => {
+        const itemDate = dayjs(item.date);
+        return itemDate.isAfter(filters.dateRange[0]) && itemDate.isBefore(filters.dateRange[1]);
+      });
+    }
+
+    if (filters.product) {
+      filtered = filtered.filter(item => item.product === filters.product);
+    }
+
+    if (filters.status) {
+      filtered = filtered.filter(item => item.status === filters.status);
+    }
+
+    if (filters.isNewRequest !== null) {
+      filtered = filtered.filter(item => item.is_new_request === filters.isNewRequest);
+    }
+
     return { productTabs: tabs, filteredFeedbackList: filtered };
-  }, [feedbackList, activeTab]);
+  }, [feedbackList, activeTab, filters]);
 
   const fetchFeedback = async () => {
     setLoading(true);
@@ -289,7 +321,7 @@ const FeedbackList = () => {
     }
   };
 
-  const columns = [
+  const allColumns = [
     {
       title: '提交日期',
       dataIndex: 'date',
@@ -378,6 +410,17 @@ const FeedbackList = () => {
       )
     },
     {
+      title: '是否新问题',
+      dataIndex: 'is_new_request',
+      key: 'is_new_request',
+      width: 120,
+      render: (isNew) => (
+        <Tag color={isNew ? 'red' : 'blue'}>
+          {isNew ? '新问题' : '已知问题'}
+        </Tag>
+      )
+    },
+    {
       title: '状态',
       dataIndex: 'status',
       key: 'status',
@@ -449,9 +492,127 @@ const FeedbackList = () => {
     }
   ];
 
+  // 根据可见列过滤
+  const columns = allColumns.filter(col => visibleColumns.includes(col.key));
+
+  // 列配置选项
+  const columnOptions = [
+    { label: '提交日期', value: 'date' },
+    { label: '用户邮箱', value: 'user_email' },
+    { label: '产品', value: 'product' },
+    { label: '问题描述', value: 'user_question' },
+    { label: '问题描述（中文）', value: 'user_question_cn' },
+    { label: 'AI 回复', value: 'ai_reply' },
+    { label: 'AI 回复转为英文', value: 'ai_reply_en' },
+    { label: 'AI分类', value: 'ai_category' },
+    { label: '情绪', value: 'ai_sentiment' },
+    { label: 'AI处理', value: 'ai_processed' },
+    { label: '是否新问题', value: 'is_new_request' },
+    { label: '状态', value: 'status' },
+    { label: '操作', value: 'action' }
+  ];
+
+  const handleColumnChange = (selectedColumns) => {
+    // 确保操作列始终显示
+    if (!selectedColumns.includes('action')) {
+      selectedColumns.push('action');
+    }
+    setVisibleColumns(selectedColumns);
+  };
+
+  const handleFilterChange = (key, value) => {
+    setFilters(prev => ({ ...prev, [key]: value }));
+  };
+
+  const handleResetFilters = () => {
+    setFilters({
+      dateRange: null,
+      product: null,
+      status: null,
+      isNewRequest: null
+    });
+  };
+
+  // 获取产品选项
+  const productOptions = useMemo(() => {
+    return [...new Set(feedbackList.map(item => item.product).filter(Boolean))];
+  }, [feedbackList]);
+
   return (
     <div style={{ padding: '24px' }}>
+      <Card style={{ marginBottom: 16 }}>
+        <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', alignItems: 'center' }}>
+          <DatePicker.RangePicker
+            placeholder={['开始日期', '结束日期']}
+            value={filters.dateRange}
+            onChange={(val) => handleFilterChange('dateRange', val)}
+            style={{ width: 240 }}
+          />
+          <Select
+            placeholder="产品"
+            allowClear
+            value={filters.product}
+            onChange={(val) => handleFilterChange('product', val)}
+            style={{ width: 150 }}
+            options={productOptions.map(p => ({ label: p, value: p }))}
+          />
+          <Select
+            placeholder="状态"
+            allowClear
+            value={filters.status}
+            onChange={(val) => handleFilterChange('status', val)}
+            style={{ width: 120 }}
+            options={[
+              { label: '待处理', value: 'pending' },
+              { label: '已处理', value: 'processed' }
+            ]}
+          />
+          <Select
+            placeholder="是否新问题"
+            allowClear
+            value={filters.isNewRequest}
+            onChange={(val) => handleFilterChange('isNewRequest', val)}
+            style={{ width: 130 }}
+            options={[
+              { label: '新问题', value: true },
+              { label: '已知问题', value: false }
+            ]}
+          />
+          <Button onClick={handleResetFilters}>重置</Button>
+          <span style={{ color: '#999', fontSize: 13 }}>共 {filteredFeedbackList.length} 条</span>
+        </div>
+      </Card>
       <div style={{ marginBottom: 16, display: 'flex', justifyContent: 'flex-end', gap: 8 }}>
+        <Dropdown
+          menu={{
+            items: [
+              {
+                key: 'column-config',
+                label: (
+                  <div onClick={(e) => e.stopPropagation()}>
+                    <div style={{ padding: '8px 0', fontWeight: 'bold', borderBottom: '1px solid #f0f0f0', marginBottom: 8 }}>
+                      选择显示列
+                    </div>
+                    <Select
+                      mode="multiple"
+                      style={{ width: 300 }}
+                      placeholder="选择要显示的列"
+                      value={visibleColumns}
+                      onChange={handleColumnChange}
+                      options={columnOptions}
+                      maxTagCount="responsive"
+                    />
+                  </div>
+                )
+              }
+            ]
+          }}
+          trigger={['click']}
+        >
+          <Button icon={<SettingOutlined />}>
+            列设置
+          </Button>
+        </Dropdown>
         <Button
           type="default"
           icon={<RobotOutlined />}

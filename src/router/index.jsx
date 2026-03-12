@@ -22,6 +22,7 @@ import TrendsDashboard from '../pages/TrendsDashboard';
 import HotTopicList from '../pages/HotTopicList';
 import FeedbackList from '../pages/FeedbackList';
 import FeedbackDashboard from '../pages/FeedbackDashboard';
+import AIPromptConfig from '../pages/AIPromptConfig';
 import Login from '../pages/Login';
 import ErrorPage from '../components/ErrorPage';
 import PrivateRoute from '../components/PrivateRoute';
@@ -132,6 +133,10 @@ const router = createBrowserRouter([
       {
         path: 'feedback-dashboard',
         element: <FeedbackDashboard />,
+      },
+      {
+        path: 'ai-prompt-config',
+        element: <AIPromptConfig />,
       },
     ],
   },

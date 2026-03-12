@@ -137,6 +137,11 @@ const MainLayout = () => {
           icon: <BarChartOutlined />,
           label: '反馈数据看板',
         },
+        {
+          key: '/ai-prompt-config',
+          icon: <SettingOutlined />,
+          label: 'AI 配置',
+        },
       ],
     },
     {
