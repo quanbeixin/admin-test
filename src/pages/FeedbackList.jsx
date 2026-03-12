@@ -1,8 +1,9 @@
-import { Table, Button, Space, Tag, message, Modal, Form, Input, Select, DatePicker, Drawer, Tabs } from 'antd';
-import { EyeOutlined, EditOutlined, DeleteOutlined, CheckOutlined, RobotOutlined, ThunderboltOutlined, CopyOutlined } from '@ant-design/icons';
+import { Table, Button, Space, Tag, message, Modal, Form, Input, Select, DatePicker, Drawer, Tabs, Upload } from 'antd';
+import { EyeOutlined, EditOutlined, DeleteOutlined, CheckOutlined, RobotOutlined, ThunderboltOutlined, CopyOutlined, UploadOutlined } from '@ant-design/icons';
 import { useState, useEffect, useMemo } from 'react';
 import dayjs from 'dayjs';
-import { getAllFeedback, createFeedback, updateFeedback, deleteFeedback, updateFeedbackStatus, analyzeUnprocessedFeedback, analyzeSingleFeedback } from '../api/feedback';
+import * as XLSX from 'xlsx';
+import { getAllFeedback, createFeedback, updateFeedback, deleteFeedback, updateFeedbackStatus, analyzeUnprocessedFeedback, analyzeSingleFeedback, batchImportFeedback } from '../api/feedback';
 
 const { TextArea } = Input;
 
@@ -15,6 +16,9 @@ const FeedbackList = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [isMockModalOpen, setIsMockModalOpen] = useState(false);
+  const [isImportModalOpen, setIsImportModalOpen] = useState(false);
+  const [importLoading, setImportLoading] = useState(false);
+  const [fileList, setFileList] = useState([]);
   const [editingFeedback, setEditingFeedback] = useState(null);
   const [viewingFeedback, setViewingFeedback] = useState(null);
   const [activeTab, setActiveTab] = useState('all');
@@ -184,6 +188,81 @@ const FeedbackList = () => {
     }).catch(() => {
       message.error('复制失败');
     });
+  };
+
+  const handleFileUpload = (file) => {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      try {
+        const data = new Uint8Array(e.target.result);
+        const workbook = XLSX.read(data, { type: 'array' });
+        const sheetName = workbook.SheetNames[0];
+        const worksheet = workbook.Sheets[sheetName];
+        const jsonData = XLSX.utils.sheet_to_json(worksheet);
+
+        // 验证数据格式
+        if (jsonData.length === 0) {
+          message.error('文件内容为空');
+          return;
+        }
+
+        // 检查必填字段（支持中英文字段名）
+        const firstRow = jsonData[0];
+        const hasChineseFields = firstRow.hasOwnProperty('用户邮箱');
+        const hasEnglishFields = firstRow.hasOwnProperty('user_email');
+
+        if (!hasChineseFields && !hasEnglishFields) {
+          message.error('文件格式不正确，请使用模板文件');
+          return;
+        }
+
+        // 转换数据格式
+        const formattedData = jsonData.map(row => ({
+          date: dayjs().format('YYYY-MM-DD HH:mm:ss'),
+          user_email: row['用户邮箱'] || row.user_email,
+          product: row['产品'] || row.product,
+          channel: row['反馈渠道'] || row.channel,
+          user_question: row['用户问题'] || row.user_question,
+          issue_type: '待分类',
+          user_request: '',
+          is_new_request: false,
+          status: 'pending'
+        }));
+
+        // 验证必填字段
+        const invalidRows = formattedData.filter(row =>
+          !row.user_email || !row.product || !row.channel || !row.user_question
+        );
+
+        if (invalidRows.length > 0) {
+          message.error(`有 ${invalidRows.length} 行数据缺少必填字段`);
+          return;
+        }
+
+        handleBatchImport(formattedData);
+      } catch (error) {
+        message.error('文件解析失败，请检查文件格式');
+        console.error('文件解析错误:', error);
+      }
+    };
+    reader.readAsArrayBuffer(file);
+    return false; // 阻止自动上传
+  };
+
+  const handleBatchImport = async (data) => {
+    setImportLoading(true);
+    try {
+      const result = await batchImportFeedback(data);
+      message.success(`成功导入 ${data.length} 条数据`);
+      setIsImportModalOpen(false);
+      setFileList([]);
+      fetchFeedback();
+    } catch (error) {
+      message.error('批量导入失败');
+      console.error('批量导入失败:', error);
+    } finally {
+      setImportLoading(false);
+    }
   };
 
   const handleSubmit = async () => {
@@ -375,6 +454,13 @@ const FeedbackList = () => {
           AI 批量分析
         </Button>
         <Button
+          type="default"
+          icon={<UploadOutlined />}
+          onClick={() => setIsImportModalOpen(true)}
+        >
+          批量导入
+        </Button>
+        <Button
           type="primary"
           icon={<CheckOutlined />}
           loading={mockInsertLoading}
@@ -515,6 +601,60 @@ const FeedbackList = () => {
             </Select>
           </Form.Item>
         </Form>
+      </Modal>
+
+      {/* 批量导入弹窗 */}
+      <Modal
+        title="批量导入反馈数据"
+        open={isImportModalOpen}
+        onCancel={() => {
+          setIsImportModalOpen(false);
+          setFileList([]);
+        }}
+        footer={null}
+      >
+        <div style={{ marginTop: 20 }}>
+          <Upload
+            accept=".xlsx,.xls,.csv"
+            fileList={fileList}
+            beforeUpload={handleFileUpload}
+            onRemove={() => setFileList([])}
+            onChange={({ fileList }) => setFileList(fileList)}
+          >
+            <Button icon={<UploadOutlined />} loading={importLoading}>
+              选择 Excel/CSV 文件
+            </Button>
+          </Upload>
+          <div style={{ marginTop: 16, color: '#666', fontSize: 12 }}>
+            <p>文件格式要求：</p>
+            <ul style={{ paddingLeft: 20 }}>
+              <li>支持 .xlsx, .xls, .csv 格式</li>
+              <li>必填字段：用户邮箱、产品、反馈渠道、用户问题</li>
+              <li>其他字段（日期、问题类型、状态等）会自动填充默认值</li>
+            </ul>
+            <a
+              href="#"
+              onClick={(e) => {
+                e.preventDefault();
+                // 生成模板文件
+                const template = [
+                  {
+                    用户邮箱: 'example@email.com',
+                    产品: '产品名称',
+                    反馈渠道: '邮件',
+                    用户问题: '问题描述'
+                  }
+                ];
+                const ws = XLSX.utils.json_to_sheet(template);
+                const wb = XLSX.utils.book_new();
+                XLSX.utils.book_append_sheet(wb, ws, '反馈数据');
+                XLSX.writeFile(wb, '反馈导入模板.xlsx');
+              }}
+            >
+              下载导入模板
+            </a>
+          </div>
+        </div>
       </Modal>
 
       {/* 查看详情抽屉 */}

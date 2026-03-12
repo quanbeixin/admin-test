@@ -77,3 +77,12 @@ export const analyzeSingleFeedback = (id) => {
     method: 'post'
   });
 };
+
+// 批量导入反馈
+export const batchImportFeedback = (data) => {
+  return request({
+    url: '/feedback/batch/import',
+    method: 'post',
+    data
+  });
+};
