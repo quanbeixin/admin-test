@@ -374,14 +374,14 @@ const FeedbackList = () => {
         >
           AI 批量分析
         </Button>
-        {/* <Button
+        <Button
           type="primary"
           icon={<CheckOutlined />}
           loading={mockInsertLoading}
           onClick={() => setIsMockModalOpen(true)}
         >
-          插入模拟数据
-        </Button> */}
+          手动插入数据
+        </Button>
       </div>
 
       <Tabs

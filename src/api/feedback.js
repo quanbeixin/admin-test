@@ -19,7 +19,7 @@ export const getFeedbackById = (id) => {
 // 创建反馈
 export const createFeedback = (data) => {
   return request({
-    url: '/feedback',
+    url: '/webhook/feedback',
     method: 'post',
     data
   });
