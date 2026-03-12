@@ -698,6 +698,7 @@ const FeedbackList = () => {
             <Select placeholder="请选择反馈渠道">
               <Select.Option value="邮件">邮件</Select.Option>
               <Select.Option value="表单">表单</Select.Option>
+              <Select.Option value="表单">商店商店评论</Select.Option>
               <Select.Option value="其他">其他</Select.Option>
             </Select>
           </Form.Item>
