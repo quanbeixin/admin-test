@@ -410,13 +410,13 @@ const FeedbackList = () => {
       )
     },
     {
-      title: '是否新问题',
+      title: '是否新需求',
       dataIndex: 'is_new_request',
       key: 'is_new_request',
       width: 120,
       render: (isNew) => (
         <Tag color={isNew ? 'red' : 'blue'}>
-          {isNew ? '新问题' : '已知问题'}
+          {isNew ? '新需求' : '已知需求'}
         </Tag>
       )
     },
@@ -507,7 +507,7 @@ const FeedbackList = () => {
     { label: 'AI分类', value: 'ai_category' },
     { label: '情绪', value: 'ai_sentiment' },
     { label: 'AI处理', value: 'ai_processed' },
-    { label: '是否新问题', value: 'is_new_request' },
+    { label: '是否新需求', value: 'is_new_request' },
     { label: '状态', value: 'status' },
     { label: '操作', value: 'action' }
   ];
@@ -568,14 +568,14 @@ const FeedbackList = () => {
             ]}
           />
           <Select
-            placeholder="是否新问题"
+            placeholder="是否新需求"
             allowClear
             value={filters.isNewRequest}
             onChange={(val) => handleFilterChange('isNewRequest', val)}
             style={{ width: 130 }}
             options={[
-              { label: '新问题', value: true },
-              { label: '已知问题', value: false }
+              { label: '新需求', value: true },
+              { label: '已知需求', value: false }
             ]}
           />
           <Button onClick={handleResetFilters}>重置</Button>
