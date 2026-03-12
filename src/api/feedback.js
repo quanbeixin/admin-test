@@ -65,7 +65,8 @@ export const analyzeUnprocessedFeedback = (limit = 10) => {
   return request({
     url: '/feedback/analyze/unprocessed',
     method: 'post',
-    params: { limit }
+    params: { limit },
+    timeout: 120000
   });
 };
 

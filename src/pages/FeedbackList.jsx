@@ -101,7 +101,7 @@ const FeedbackList = () => {
       onOk: async () => {
         setAiAnalyzeLoading(true);
         try {
-          const result = await analyzeUnprocessedFeedback(50);
+          const result = await analyzeUnprocessedFeedback(3);
           message.success(result.message || '分析完成');
           fetchFeedback();
         } catch (error) {
