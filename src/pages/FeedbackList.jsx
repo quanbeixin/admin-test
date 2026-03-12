@@ -95,7 +95,7 @@ const FeedbackList = () => {
   const handleAiAnalyze = async () => {
     Modal.confirm({
       title: 'AI 分析确认',
-      content: '将调用 Claude API 分析所有未分类的反馈，是否继续？',
+      content: '将调用AI模型分析所有未分类的反馈，是否继续？',
       okText: '开始分析',
       cancelText: '取消',
       onOk: async () => {
@@ -331,7 +331,7 @@ const FeedbackList = () => {
             onClick={() => handleSingleAnalyze(record)}
             disabled={analyzingIds.has(record.id)}
           >
-            AI分析
+            AI批量分析
           </Button>
           <Button
             type="link"
@@ -374,14 +374,14 @@ const FeedbackList = () => {
         >
           AI 分析
         </Button>
-        <Button
+        {/* <Button
           type="primary"
           icon={<CheckOutlined />}
           loading={mockInsertLoading}
           onClick={() => setIsMockModalOpen(true)}
         >
           插入模拟数据
-        </Button>
+        </Button> */}
       </div>
 
       <Tabs
