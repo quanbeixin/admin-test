@@ -128,14 +128,14 @@ const MainLayout = () => {
       label: '用户反馈',
       children: [
         {
-          key: '/feedback-dashboard',
-          icon: <BarChartOutlined />,
-          label: '反馈数据看板',
-        },
-        {
           key: '/feedback-list',
           icon: <UnorderedListOutlined />,
           label: '用户问题记录',
+        },
+        {
+          key: '/feedback-dashboard',
+          icon: <BarChartOutlined />,
+          label: '反馈数据看板',
         },
       ],
     },
