@@ -331,7 +331,7 @@ const FeedbackList = () => {
             onClick={() => handleSingleAnalyze(record)}
             disabled={analyzingIds.has(record.id)}
           >
-            AI批量分析
+            AI分析
           </Button>
           <Button
             type="link"
@@ -372,7 +372,7 @@ const FeedbackList = () => {
           loading={aiAnalyzeLoading}
           onClick={handleAiAnalyze}
         >
-          AI 分析
+          AI 批量分析
         </Button>
         {/* <Button
           type="primary"
