@@ -152,10 +152,6 @@ const Login = () => {
               <span>登录</span>
             </Button>
           </Form.Item>
-
-          <div className="register-prompt">
-            还没有账号？ <a onClick={handleOpenRegister} className="register-link">立即注册</a>
-          </div>
         </Form>
       </div>
 
