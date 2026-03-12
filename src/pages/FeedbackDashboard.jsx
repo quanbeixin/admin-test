@@ -1,6 +1,6 @@
 import { Card, Row, Col, Statistic, Table, DatePicker, Select, Spin } from 'antd';
 import { UserOutlined, MessageOutlined, CheckCircleOutlined, ClockCircleOutlined } from '@ant-design/icons';
-import { Pie } from '@ant-design/charts';
+import { Pie, Column } from '@ant-design/charts';
 import { useState, useEffect } from 'react';
 import { getAllFeedback } from '../api/feedback';
 import dayjs from 'dayjs';
@@ -66,6 +66,41 @@ const FeedbackDashboard = () => {
     ...productStats[product],
     processRate: ((productStats[product].processed / productStats[product].total) * 100).toFixed(1)
   }));
+
+  // 产品柱状图数据
+  const productColumnData = Object.keys(productStats).map(product => ({
+    product,
+    count: productStats[product].total
+  }));
+
+  const productColumnConfig = {
+    data: productColumnData,
+    xField: 'product',
+    yField: 'count',
+    label: {
+      position: 'top',
+      style: {
+        fill: '#000',
+        opacity: 0.6,
+      },
+    },
+    xAxis: {
+      label: {
+        autoHide: false,
+        autoRotate: false,
+      },
+    },
+    meta: {
+      product: {
+        alias: '产品',
+      },
+      count: {
+        alias: '反馈数量',
+      },
+    },
+    height: 300,
+    color: '#5AD8A6'
+  };
 
   // 按分类统计
   const categoryStats = {};
@@ -141,6 +176,47 @@ const FeedbackDashboard = () => {
     Negative: filteredData.filter(item => item.ai_sentiment === 'Negative').length
   };
 
+  // 按渠道统计
+  const channelStats = {};
+  filteredData.forEach(item => {
+    const channel = item.channel || '未知';
+    channelStats[channel] = (channelStats[channel] || 0) + 1;
+  });
+
+  const channelData = Object.keys(channelStats).map(channel => ({
+    channel,
+    count: channelStats[channel]
+  }));
+
+  const columnConfig = {
+    data: channelData,
+    xField: 'channel',
+    yField: 'count',
+    label: {
+      position: 'top',
+      style: {
+        fill: '#000',
+        opacity: 0.6,
+      },
+    },
+    xAxis: {
+      label: {
+        autoHide: false,
+        autoRotate: false,
+      },
+    },
+    meta: {
+      channel: {
+        alias: '反馈渠道',
+      },
+      count: {
+        alias: '数量',
+      },
+    },
+    height: 300,
+    color: '#5B8FF9'
+  };
+
   // 获取产品列表
   const products = ['all', ...new Set(feedbackList.map(item => item.product).filter(Boolean))];
 
@@ -169,8 +245,8 @@ const FeedbackDashboard = () => {
   ];
 
   return (
-    <div style={{ padding: '24px' }}>
-      <div style={{ marginBottom: 24, display: 'flex', gap: 16, alignItems: 'center' }}>
+    <div className="feedback-dashboard">
+      <div className="dashboard-filters">
         <RangePicker
           value={dateRange}
           onChange={(dates) => setDateRange(dates)}
@@ -278,16 +354,16 @@ const FeedbackDashboard = () => {
           </Col>
         </Row>
 
-        {/* 产品统计 */}
+        {/* 反馈渠道统计和产品统计 */}
         <Row gutter={16}>
-          <Col span={24}>
-            <Card title="产品反馈统计">
-              <Table
-                dataSource={productTableData}
-                columns={productColumns}
-                pagination={false}
-                rowKey="product"
-              />
+          <Col span={12}>
+            <Card title="反馈渠道分布" className="chart-card">
+              <Column {...columnConfig} />
+            </Card>
+          </Col>
+          <Col span={12}>
+            <Card title="用户反馈量分布" className="chart-card">
+              <Column {...productColumnConfig} />
             </Card>
           </Col>
         </Row>

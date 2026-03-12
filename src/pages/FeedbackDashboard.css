@@ -1,60 +1,155 @@
-/* 饼图卡片样式 */
+/* 整体容器 */
+.feedback-dashboard {
+  padding: 24px;
+  background: linear-gradient(135deg, #f5f7fa 0%, #e8ecf1 100%);
+  min-height: 100vh;
+}
+
+/* 筛选区域 */
+.dashboard-filters {
+  margin-bottom: 24px;
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  padding: 20px;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+/* 统计卡片 */
+.stat-card {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  border-radius: 12px;
+  border: none;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  overflow: hidden;
+  position: relative;
+}
+
+.stat-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, #1890ff, #36cfc9);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.stat-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+}
+
+.stat-card:hover::before {
+  opacity: 1;
+}
+
+.stat-card .ant-card-body {
+  padding: 24px;
+}
+
+/* 饼图卡片 */
 .pie-chart-card {
-  background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+  background: white;
   border-radius: 16px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+  border: none;
   overflow: hidden;
 }
 
 .pie-chart-card .ant-card-head {
   border-bottom: 2px solid #f0f0f0;
-  background: white;
+  background: linear-gradient(135deg, #fafbfc 0%, #ffffff 100%);
+  padding: 20px 24px;
 }
 
 .pie-chart-card .ant-card-head-title {
   font-size: 18px;
   font-weight: 600;
   color: #1a1a1a;
+  letter-spacing: -0.02em;
 }
 
-/* 分类列表样式 */
+.pie-chart-card .ant-card-body {
+  padding: 32px 24px;
+}
+
+/* 分类列表 */
 .category-list {
   max-height: 400px;
   overflow-y: auto;
-  padding-right: 16px;
+  padding-right: 12px;
 }
 
 .category-item {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 12px 16px;
-  margin-bottom: 8px;
-  background: white;
-  border-radius: 8px;
+  padding: 14px 18px;
+  margin-bottom: 10px;
+  background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+  border-radius: 10px;
   border-left: 4px solid;
-  transition: all 0.3s ease;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   cursor: pointer;
+  position: relative;
+  overflow: hidden;
+}
+
+.category-item::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, rgba(24, 144, 255, 0.05) 0%, rgba(54, 207, 201, 0.05) 100%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
 }
 
 .category-item:hover {
-  transform: translateX(4px);
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+  transform: translateX(6px);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+}
+
+.category-item:hover::before {
+  opacity: 1;
 }
 
 .category-item-left {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 14px;
   flex: 1;
+  position: relative;
+  z-index: 1;
 }
 
 .category-dot {
-  width: 12px;
-  height: 12px;
+  width: 14px;
+  height: 14px;
   border-radius: 50%;
   flex-shrink: 0;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  position: relative;
+}
+
+.category-dot::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 6px;
+  height: 6px;
+  background: white;
+  border-radius: 50%;
+  opacity: 0.8;
 }
 
 .category-name {
@@ -62,29 +157,36 @@
   font-weight: 500;
   color: #333;
   flex: 1;
+  position: relative;
+  z-index: 1;
 }
 
 .category-stats {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
+  position: relative;
+  z-index: 1;
 }
 
 .category-count {
-  font-size: 16px;
-  font-weight: 600;
+  font-size: 18px;
+  font-weight: 700;
   color: #1a1a1a;
+  font-variant-numeric: tabular-nums;
 }
 
 .category-percentage {
   font-size: 13px;
   color: #666;
-  background: #f5f5f5;
-  padding: 2px 8px;
-  border-radius: 12px;
+  background: linear-gradient(135deg, #f5f5f5 0%, #e8e8e8 100%);
+  padding: 4px 10px;
+  border-radius: 14px;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
 }
 
-/* 滚动条样式 */
+/* 滚动条 */
 .category-list::-webkit-scrollbar {
   width: 6px;
 }
@@ -95,12 +197,12 @@
 }
 
 .category-list::-webkit-scrollbar-thumb {
-  background: #c1c1c1;
+  background: linear-gradient(180deg, #c1c1c1 0%, #a8a8a8 100%);
   border-radius: 3px;
 }
 
 .category-list::-webkit-scrollbar-thumb:hover {
-  background: #a8a8a8;
+  background: linear-gradient(180deg, #a8a8a8 0%, #8f8f8f 100%);
 }
 
 /* 饼图容器 */
@@ -111,14 +213,70 @@
   padding: 20px;
   background: radial-gradient(circle at center, #ffffff 0%, #f8f9fa 100%);
   border-radius: 12px;
+  position: relative;
 }
 
-/* 统计卡片动画 */
-.stat-card {
+.pie-chart-container::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 90%;
+  height: 90%;
+  background: radial-gradient(circle, rgba(24, 144, 255, 0.03) 0%, transparent 70%);
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+/* 柱状图卡片 */
+.chart-card {
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+  border: none;
+  overflow: hidden;
   transition: all 0.3s ease;
 }
 
-.stat-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+.chart-card:hover {
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.1);
+}
+
+.chart-card .ant-card-head {
+  border-bottom: 2px solid #f0f0f0;
+  background: linear-gradient(135deg, #fafbfc 0%, #ffffff 100%);
+  padding: 20px 24px;
+}
+
+.chart-card .ant-card-head-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: #1a1a1a;
+  letter-spacing: -0.02em;
+}
+
+.chart-card .ant-card-body {
+  padding: 32px 24px;
+  background: linear-gradient(135deg, #ffffff 0%, #fafbfc 100%);
+}
+
+/* 加载动画优化 */
+.ant-spin-container {
+  transition: opacity 0.3s ease;
+}
+
+/* 响应式优化 */
+@media (max-width: 768px) {
+  .feedback-dashboard {
+    padding: 16px;
+  }
+
+  .category-item {
+    padding: 12px 14px;
+  }
+
+  .stat-card .ant-card-body {
+    padding: 20px;
+  }
 }

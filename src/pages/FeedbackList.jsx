@@ -316,6 +316,13 @@ const FeedbackList = () => {
       width: 250,
       ellipsis: true
     },
+    {
+      title: '问题描述（中文）',
+      dataIndex: 'user_question_cn',
+      key: 'user_question_cn',
+      width: 250,
+      ellipsis: true
+    },
      {
       title: 'AI 回复',
       dataIndex: 'ai_reply',
@@ -682,8 +689,13 @@ const FeedbackList = () => {
 
             <div style={{ marginBottom: 16 }}>
               <h3>问题描述</h3>
-              <div style={{ background: '#f5f5f5', padding: 12, borderRadius: 4 }}>
+              <p><strong>原文：</strong></p>
+              <div style={{ background: '#f5f5f5', padding: 12, borderRadius: 4, marginBottom: 12 }}>
                 {viewingFeedback.user_question || '-'}
+              </div>
+              <p><strong>中文翻译：</strong></p>
+              <div style={{ background: '#f5f5f5', padding: 12, borderRadius: 4 }}>
+                {viewingFeedback.user_question_cn || '-'}
               </div>
               <p style={{ marginTop: 12 }}><strong>用户需求：</strong>{viewingFeedback.user_request || '-'}</p>
               <p><strong>是否新需求：</strong>{viewingFeedback.is_new_request ? '是' : '否'}</p>
