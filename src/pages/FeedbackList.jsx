@@ -1,6 +1,6 @@
-import { Table, Button, Space, Tag, message, Modal, Form, Input, Select, DatePicker, Drawer } from 'antd';
-import { EyeOutlined, EditOutlined, DeleteOutlined, CheckOutlined, RobotOutlined, ThunderboltOutlined } from '@ant-design/icons';
-import { useState, useEffect } from 'react';
+import { Table, Button, Space, Tag, message, Modal, Form, Input, Select, DatePicker, Drawer, Tabs } from 'antd';
+import { EyeOutlined, EditOutlined, DeleteOutlined, CheckOutlined, RobotOutlined, ThunderboltOutlined, CopyOutlined } from '@ant-design/icons';
+import { useState, useEffect, useMemo } from 'react';
 import dayjs from 'dayjs';
 import { getAllFeedback, createFeedback, updateFeedback, deleteFeedback, updateFeedbackStatus, analyzeUnprocessedFeedback, analyzeSingleFeedback } from '../api/feedback';
 
@@ -17,12 +17,32 @@ const FeedbackList = () => {
   const [isMockModalOpen, setIsMockModalOpen] = useState(false);
   const [editingFeedback, setEditingFeedback] = useState(null);
   const [viewingFeedback, setViewingFeedback] = useState(null);
+  const [activeTab, setActiveTab] = useState('all');
   const [form] = Form.useForm();
   const [mockForm] = Form.useForm();
 
   useEffect(() => {
     fetchFeedback();
   }, []);
+
+  // 获取所有产品列表和分组数据
+  const { productTabs, filteredFeedbackList } = useMemo(() => {
+    const products = [...new Set(feedbackList.map(item => item.product).filter(Boolean))];
+    const tabs = [
+      { key: 'all', label: '全部', count: feedbackList.length }
+    ];
+
+    products.forEach(product => {
+      const count = feedbackList.filter(item => item.product === product).length;
+      tabs.push({ key: product, label: product, count });
+    });
+
+    const filtered = activeTab === 'all'
+      ? feedbackList
+      : feedbackList.filter(item => item.product === activeTab);
+
+    return { productTabs: tabs, filteredFeedbackList: filtered };
+  }, [feedbackList, activeTab]);
 
   const fetchFeedback = async () => {
     setLoading(true);
@@ -152,6 +172,18 @@ const FeedbackList = () => {
       message.error('状态更新失败');
       console.error('状态更新失败:', error);
     }
+  };
+
+  const handleCopy = (text, label) => {
+    if (!text) {
+      message.warning('内容为空，无法复制');
+      return;
+    }
+    navigator.clipboard.writeText(text).then(() => {
+      message.success(`${label}已复制到剪贴板`);
+    }).catch(() => {
+      message.error('复制失败');
+    });
   };
 
   const handleSubmit = async () => {
@@ -351,16 +383,27 @@ const FeedbackList = () => {
           插入模拟数据
         </Button>
       </div>
-      <Table
-        columns={columns}
-        dataSource={feedbackList}
-        rowKey="id"
-        loading={loading}
-        scroll={{ x: 1500 }}
-        pagination={{
-          showSizeChanger: true,
-          showTotal: (total) => `共 ${total} 条记录`
-        }}
+
+      <Tabs
+        activeKey={activeTab}
+        onChange={setActiveTab}
+        items={productTabs.map(tab => ({
+          key: tab.key,
+          label: `${tab.label} (${tab.count})`,
+          children: (
+            <Table
+              columns={columns}
+              dataSource={filteredFeedbackList}
+              rowKey="id"
+              loading={loading}
+              scroll={{ x: 1500 }}
+              pagination={{
+                showSizeChanger: true,
+                showTotal: (total) => `共 ${total} 条记录`
+              }}
+            />
+          )
+        }))}
       />
 
       <Modal
@@ -478,7 +521,7 @@ const FeedbackList = () => {
       <Drawer
         title="反馈详情"
         placement="right"
-        width={720}
+        size="large"
         onClose={() => setIsDrawerOpen(false)}
         open={isDrawerOpen}
       >
@@ -521,9 +564,31 @@ const FeedbackList = () => {
                   {viewingFeedback.ai_sentiment || '-'}
                 </Tag>
               </p>
-              <p><strong>AI 自动回复：</strong></p>
-              <div style={{ background: '#f5f5f5', padding: 12, borderRadius: 4 }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+                <strong>AI 自动回复（中文）：</strong>
+                <Button
+                  size="small"
+                  icon={<CopyOutlined />}
+                  onClick={() => handleCopy(viewingFeedback.ai_reply, 'AI 自动回复（中文）')}
+                >
+                  复制
+                </Button>
+              </div>
+              <div style={{ background: '#f5f5f5', padding: 12, borderRadius: 4, marginBottom: 12 }}>
                 {viewingFeedback.ai_reply || '-'}
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+                <strong>AI 自动回复（英文）：</strong>
+                <Button
+                  size="small"
+                  icon={<CopyOutlined />}
+                  onClick={() => handleCopy(viewingFeedback.ai_reply_en, 'AI 自动回复（英文）')}
+                >
+                  复制
+                </Button>
+              </div>
+              <div style={{ background: '#f5f5f5', padding: 12, borderRadius: 4 }}>
+                {viewingFeedback.ai_reply_en || '-'}
               </div>
             </div>
 

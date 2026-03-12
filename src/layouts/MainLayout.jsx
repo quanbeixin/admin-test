@@ -174,6 +174,18 @@ const MainLayout = () => {
 
   const userInfo = getUserInfo();
 
+  // 根据用户角色过滤菜单
+  const getFilteredMenuItems = () => {
+    // 如果是普通用户（role === 1），只显示用户反馈菜单
+    if (userInfo?.role === 1) {
+      return menuItems.filter(item => item.key === 'feedback-menu');
+    }
+    // 管理员（role === 0）显示所有菜单
+    return menuItems;
+  };
+
+  const filteredMenuItems = getFilteredMenuItems();
+
   // 登出
   const handleLogout = async () => {
     try {
@@ -217,7 +229,7 @@ const MainLayout = () => {
           theme="dark"
           mode="inline"
           selectedKeys={[location.pathname]}
-          items={menuItems}
+          items={filteredMenuItems}
           onClick={handleMenuClick}
         />
       </Sider>

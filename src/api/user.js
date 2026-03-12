@@ -26,6 +26,14 @@ export const register = (data) => {
   });
 };
 
+// 获取当前用户信息
+export const getCurrentUser = () => {
+  return request({
+    url: '/users/current',
+    method: 'get',
+  });
+};
+
 // 获取用户列表
 export const getUserList = (params) => {
   return request({

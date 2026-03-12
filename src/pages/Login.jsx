@@ -2,7 +2,7 @@ import { Form, Input, Button, Checkbox, message, Modal } from 'antd';
 import { UserOutlined, LockOutlined, MailOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import { useState, useEffect } from 'react';
-import { login, register } from '../api/user';
+import { login, register, getCurrentUser } from '../api/user';
 import './Login.css';
 
 const Login = () => {
@@ -27,10 +27,24 @@ const Login = () => {
       });
 
       const token = response.token || response.data?.token;
-      const userInfo = response.userInfo || response.data?.userInfo;
+      let userInfo = response.data || response.userInfo;
 
       if (token) {
         localStorage.setItem('token', token);
+
+        // 如果 userInfo 没有 role 字段，尝试获取当前用户完整信息
+        if (!userInfo || userInfo.role === undefined) {
+          try {
+            const currentUserResponse = await getCurrentUser();
+            const currentUser = currentUserResponse.data || currentUserResponse;
+            if (currentUser) {
+              userInfo = currentUser;
+            }
+          } catch (error) {
+            console.error('获取用户详情失败:', error);
+          }
+        }
+
         if (userInfo) {
           localStorage.setItem('userInfo', JSON.stringify(userInfo));
         } else {
