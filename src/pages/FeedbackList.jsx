@@ -4,6 +4,7 @@ import { useState, useEffect, useMemo } from 'react';
 import dayjs from 'dayjs';
 import * as XLSX from 'xlsx';
 import { getAllFeedback, createFeedback, updateFeedback, deleteFeedback, updateFeedbackStatus, analyzeUnprocessedFeedback, analyzeSingleFeedback, batchImportFeedback } from '../api/feedback';
+import { getFieldOptions } from '../api/fieldConfig';
 
 const { TextArea } = Input;
 
@@ -22,6 +23,7 @@ const FeedbackList = () => {
   const [editingFeedback, setEditingFeedback] = useState(null);
   const [viewingFeedback, setViewingFeedback] = useState(null);
   const [activeTab, setActiveTab] = useState('all');
+  const [productOptions, setProductOptions] = useState([]);
   const [visibleColumns, setVisibleColumns] = useState([
     'date', 'user_email', 'product', 'user_question', 'user_question_cn',
     'ai_reply', 'ai_reply_en', 'ai_category', 'ai_sentiment', 'ai_processed',
@@ -38,6 +40,7 @@ const FeedbackList = () => {
 
   useEffect(() => {
     fetchFeedback();
+    fetchProductOptions();
   }, []);
 
   // 获取所有产品列表和分组数据
@@ -94,6 +97,23 @@ const FeedbackList = () => {
     }
   };
 
+  const fetchProductOptions = async () => {
+    try {
+      const response = await getFieldOptions();
+      const allOptions = response.data || [];
+      // 筛选出 A1_product 字段的选项
+      const productOpts = allOptions
+        .filter(opt => opt.field_name === 'A1_product')
+        .map(opt => ({
+          label: opt.option_label,
+          value: opt.option_value
+        }));
+      setProductOptions(productOpts);
+    } catch (error) {
+      console.error('获取产品选项失败:', error);
+    }
+  };
+
   const handleMockInsert = async () => {
     try {
       const values = await mockForm.validateFields();
@@ -101,7 +121,7 @@ const FeedbackList = () => {
 
       const mockData = {
         date: now.format('YYYY-MM-DD HH:mm:ss'),
-        user_email: values.user_email,
+        user_email: values.user_email || 'example@gmail.com',
         product: values.product,
         channel: values.channel,
         user_question: values.user_question,
@@ -533,8 +553,8 @@ const FeedbackList = () => {
     });
   };
 
-  // 获取产品选项
-  const productOptions = useMemo(() => {
+  // 获取筛选器的产品选项（从现有反馈列表中提取）
+  const filterProductOptions = useMemo(() => {
     return [...new Set(feedbackList.map(item => item.product).filter(Boolean))];
   }, [feedbackList]);
 
@@ -554,7 +574,7 @@ const FeedbackList = () => {
             value={filters.product}
             onChange={(val) => handleFilterChange('product', val)}
             style={{ width: 150 }}
-            options={productOptions.map(p => ({ label: p, value: p }))}
+            options={filterProductOptions.map(p => ({ label: p, value: p }))}
           />
           <Select
             placeholder="状态"
@@ -677,18 +697,17 @@ const FeedbackList = () => {
             label="用户邮箱"
             name="user_email"
             rules={[
-              { required: true, message: '请输入用户邮箱' },
               { type: 'email', message: '请输入正确的邮箱格式' }
             ]}
           >
-            <Input placeholder="请输入用户邮箱" />
+            <Input placeholder="请输入用户邮箱（选填，默认为 example@gmail.com）" />
           </Form.Item>
           <Form.Item
             label="产品"
             name="product"
-            rules={[{ required: true, message: '请输入产品名称' }]}
+            rules={[{ required: true, message: '请选择产品' }]}
           >
-            <Input placeholder="请输入产品名称" />
+            <Select placeholder="请选择产品" options={productOptions} />
           </Form.Item>
           <Form.Item
             label="反馈渠道"
@@ -698,7 +717,7 @@ const FeedbackList = () => {
             <Select placeholder="请选择反馈渠道">
               <Select.Option value="邮件">邮件</Select.Option>
               <Select.Option value="表单">表单</Select.Option>
-              <Select.Option value="表单">商店商店评论</Select.Option>
+              <Select.Option value="表单">商店评论</Select.Option>
               <Select.Option value="其他">其他</Select.Option>
             </Select>
           </Form.Item>

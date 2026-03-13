@@ -23,6 +23,7 @@ import HotTopicList from '../pages/HotTopicList';
 import FeedbackList from '../pages/FeedbackList';
 import FeedbackDashboard from '../pages/FeedbackDashboard';
 import AIPromptConfig from '../pages/AIPromptConfig';
+import FunctionTest from '../pages/FunctionTest';
 import Login from '../pages/Login';
 import ErrorPage from '../components/ErrorPage';
 import PrivateRoute from '../components/PrivateRoute';
@@ -137,6 +138,10 @@ const router = createBrowserRouter([
       {
         path: 'ai-prompt-config',
         element: <AIPromptConfig />,
+      },
+      {
+        path: 'function-test',
+        element: <FunctionTest />,
       },
     ],
   },

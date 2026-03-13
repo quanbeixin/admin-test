@@ -19,6 +19,7 @@ import {
   ThunderboltOutlined,
   FireOutlined,
   MessageOutlined,
+  BugOutlined,
 } from '@ant-design/icons';
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
 import { logout } from '../api/user';
@@ -160,6 +161,11 @@ const MainLayout = () => {
         {
           key: '/company-management',
           label: '公司主体管理',
+        },
+        {
+          key: '/function-test',
+          icon: <BugOutlined />,
+          label: '功能测试',
         },
       ],
     },
