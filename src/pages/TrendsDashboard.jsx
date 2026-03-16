@@ -66,6 +66,7 @@ const columns = [
   {
     title: '视频标题 / 标签',
     key: 'title',
+    width: 200,
     render: (_, record) => (
       <div>
         {record.title ? (

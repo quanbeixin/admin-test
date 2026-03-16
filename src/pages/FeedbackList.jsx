@@ -1,5 +1,5 @@
 import { Table, Button, Space, Tag, message, Modal, Form, Input, Select, DatePicker, Drawer, Tabs, Upload, Dropdown, Card } from 'antd';
-import { EyeOutlined, EditOutlined, DeleteOutlined, CheckOutlined, RobotOutlined, ThunderboltOutlined, CopyOutlined, UploadOutlined, SettingOutlined } from '@ant-design/icons';
+import { EyeOutlined, EditOutlined, DeleteOutlined, CheckOutlined, RobotOutlined, ThunderboltOutlined, CopyOutlined, UploadOutlined, SettingOutlined, SearchOutlined } from '@ant-design/icons';
 import { useState, useEffect, useMemo } from 'react';
 import dayjs from 'dayjs';
 import * as XLSX from 'xlsx';
@@ -30,6 +30,7 @@ const FeedbackList = () => {
     'is_new_request', 'status', 'action'
   ]);
   const [filters, setFilters] = useState({
+    searchText: '',
     dateRange: null,
     product: null,
     status: null,
@@ -59,6 +60,22 @@ const FeedbackList = () => {
     let filtered = activeTab === 'all'
       ? feedbackList
       : feedbackList.filter(item => item.product === activeTab);
+
+    // 搜索过滤
+    if (filters.searchText) {
+      const searchLower = filters.searchText.toLowerCase();
+      filtered = filtered.filter(item => {
+        return (
+          (item.user_email && item.user_email.toLowerCase().includes(searchLower)) ||
+          (item.user_question && item.user_question.toLowerCase().includes(searchLower)) ||
+          (item.user_question_cn && item.user_question_cn.toLowerCase().includes(searchLower)) ||
+          (item.ai_reply && item.ai_reply.toLowerCase().includes(searchLower)) ||
+          (item.ai_reply_en && item.ai_reply_en.toLowerCase().includes(searchLower)) ||
+          (item.product && item.product.toLowerCase().includes(searchLower)) ||
+          (item.ai_category && item.ai_category.toLowerCase().includes(searchLower))
+        );
+      });
+    }
 
     // 再应用筛选条件
     if (filters.dateRange && filters.dateRange.length === 2) {
@@ -379,15 +396,43 @@ const FeedbackList = () => {
       title: 'AI 回复',
       dataIndex: 'ai_reply',
       key: 'ai_reply',
-      width: 180,
-      ellipsis: true
+      width: 220,
+      ellipsis: true,
+      render: (text) => (
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <span style={{ flex: 1, overflow: 'hidden', textOverflow: 'ellipsis' }}>{text || '-'}</span>
+          {text && (
+            <Button
+              type="text"
+              size="small"
+              icon={<CopyOutlined />}
+              onClick={() => handleCopy(text, 'AI 回复')}
+              style={{ flexShrink: 0 }}
+            />
+          )}
+        </div>
+      )
     },
     {
       title: 'AI 回复转为英文',
       dataIndex: 'ai_reply_en',
       key: 'ai_reply_en',
-      width: 180,
-      ellipsis: true
+      width: 220,
+      ellipsis: true,
+      render: (text) => (
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <span style={{ flex: 1, overflow: 'hidden', textOverflow: 'ellipsis' }}>{text || '-'}</span>
+          {text && (
+            <Button
+              type="text"
+              size="small"
+              icon={<CopyOutlined />}
+              onClick={() => handleCopy(text, 'AI 转英文')}
+              style={{ flexShrink: 0 }}
+            />
+          )}
+        </div>
+      )
     },
     {
       title: 'AI分类',
@@ -546,6 +591,7 @@ const FeedbackList = () => {
 
   const handleResetFilters = () => {
     setFilters({
+      searchText: '',
       dateRange: null,
       product: null,
       status: null,
@@ -562,6 +608,14 @@ const FeedbackList = () => {
     <div style={{ padding: '24px' }}>
       <Card style={{ marginBottom: 16 }}>
         <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', alignItems: 'center' }}>
+          <Input
+            placeholder="搜索邮箱、问题、AI回复..."
+            prefix={<SearchOutlined style={{ color: '#bfbfbf' }} />}
+            value={filters.searchText}
+            onChange={(e) => handleFilterChange('searchText', e.target.value)}
+            allowClear
+            style={{ width: 280 }}
+          />
           <DatePicker.RangePicker
             placeholder={['开始日期', '结束日期']}
             value={filters.dateRange}
