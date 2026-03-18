@@ -112,17 +112,21 @@ const FeedbackDashboard = () => {
   console.log('分类统计:', categoryStats);
   console.log('示例数据:', filteredData[0]);
 
-  const categoryTableData = Object.keys(categoryStats).map(category => ({
-    category,
-    count: categoryStats[category],
-    percentage: ((categoryStats[category] / filteredData.length) * 100).toFixed(1)
-  }));
+  const categoryTableData = Object.keys(categoryStats)
+    .map(category => ({
+      category,
+      count: categoryStats[category],
+      percentage: ((categoryStats[category] / filteredData.length) * 100).toFixed(1)
+    }))
+    .sort((a, b) => b.count - a.count);
 
-  // 饼图数据
-  const pieData = Object.keys(categoryStats).map(category => ({
-    type: category,
-    value: categoryStats[category]
-  }));
+  // 饼图数据（按数量倒序）
+  const pieData = Object.keys(categoryStats)
+    .map(category => ({
+      type: category,
+      value: categoryStats[category]
+    }))
+    .sort((a, b) => b.value - a.value);
 
   // 生成颜色
   const colors = [

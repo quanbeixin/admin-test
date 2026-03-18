@@ -8,6 +8,16 @@ import { getFieldOptions } from '../api/fieldConfig';
 
 const { TextArea } = Input;
 
+// 添加样式
+const styles = `
+  .highlight-row {
+    background-color: #fff7e6 !important;
+  }
+  .highlight-row:hover > td {
+    background-color: #ffe7ba !important;
+  }
+`;
+
 const FeedbackList = () => {
   const [feedbackList, setFeedbackList] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -26,7 +36,7 @@ const FeedbackList = () => {
   const [productOptions, setProductOptions] = useState([]);
   const [visibleColumns, setVisibleColumns] = useState([
     'date', 'user_email', 'product', 'user_question', 'user_question_cn',
-    'ai_reply', 'ai_reply_en', 'ai_category', 'ai_sentiment', 'ai_processed',
+    'ai_reply', 'ai_reply_en', 'ai_category', 'ai_processed',
     'is_new_request', 'status', 'action'
   ]);
   const [filters, setFilters] = useState({
@@ -34,7 +44,8 @@ const FeedbackList = () => {
     dateRange: null,
     product: null,
     status: null,
-    isNewRequest: null
+    isNewRequest: null,
+    aiCategory: null
   });
   const [form] = Form.useForm();
   const [mockForm] = Form.useForm();
@@ -97,7 +108,48 @@ const FeedbackList = () => {
       filtered = filtered.filter(item => item.is_new_request === filters.isNewRequest);
     }
 
-    return { productTabs: tabs, filteredFeedbackList: filtered };
+    if (filters.aiCategory) {
+      filtered = filtered.filter(item => item.ai_category === filters.aiCategory);
+    }
+
+    // 排序：按日期（天）和邮箱分组，让同一天内相同邮箱的反馈紧挨着显示
+    filtered.sort((a, b) => {
+      const dateA = dayjs(a.date).format('YYYY-MM-DD');
+      const dateB = dayjs(b.date).format('YYYY-MM-DD');
+      const emailA = a.user_email || '';
+      const emailB = b.user_email || '';
+
+      // 先按日期降序（最新的在前）
+      if (dateA !== dateB) {
+        return dateB.localeCompare(dateA);
+      }
+
+      // 同一天内按邮箱排序
+      if (emailA !== emailB) {
+        return emailA.localeCompare(emailB);
+      }
+
+      // 同一天同一邮箱内按时间降序
+      return dayjs(b.date).valueOf() - dayjs(a.date).valueOf();
+    });
+
+    // 计算每个分组的数量（同一天+同一邮箱）
+    const groupCounts = {};
+    filtered.forEach(item => {
+      const date = dayjs(item.date).format('YYYY-MM-DD');
+      const email = item.user_email || '';
+      const groupKey = `${date}_${email}`;
+      groupCounts[groupKey] = (groupCounts[groupKey] || 0) + 1;
+    });
+
+    // 为每条数据添加分组信息
+    const filteredWithGroup = filtered.map(item => ({
+      ...item,
+      _groupKey: `${dayjs(item.date).format('YYYY-MM-DD')}_${item.user_email || ''}`,
+      _groupCount: groupCounts[`${dayjs(item.date).format('YYYY-MM-DD')}_${item.user_email || ''}`]
+    }));
+
+    return { productTabs: tabs, filteredFeedbackList: filteredWithGroup };
   }, [feedbackList, activeTab, filters]);
 
   const fetchFeedback = async () => {
@@ -370,7 +422,22 @@ const FeedbackList = () => {
       title: '用户邮箱',
       dataIndex: 'user_email',
       key: 'user_email',
-      width: 200
+      width: 200,
+      ellipsis: true,
+      render: (text) => (
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <span style={{ flex: 1, overflow: 'hidden', textOverflow: 'ellipsis' }}>{text || '-'}</span>
+          {text && (
+            <Button
+              type="text"
+              size="small"
+              icon={<CopyOutlined />}
+              onClick={() => handleCopy(text, '用户邮箱')}
+              style={{ flexShrink: 0 }}
+            />
+          )}
+        </div>
+      )
     },
     {
       title: '产品',
@@ -447,20 +514,6 @@ const FeedbackList = () => {
           '咨询': 'green'
         };
         return category ? <Tag color={colorMap[category] || 'default'}>{category}</Tag> : '-';
-      }
-    },
-    {
-      title: '情绪',
-      dataIndex: 'ai_sentiment',
-      key: 'ai_sentiment',
-      width: 100,
-      render: (sentiment) => {
-        const colorMap = {
-          'Positive': 'green',
-          'Neutral': 'default',
-          'Negative': 'red'
-        };
-        return sentiment ? <Tag color={colorMap[sentiment]}>{sentiment}</Tag> : '-';
       }
     },
     {
@@ -570,7 +623,6 @@ const FeedbackList = () => {
     { label: 'AI 回复', value: 'ai_reply' },
     { label: 'AI 回复转为英文', value: 'ai_reply_en' },
     { label: 'AI分类', value: 'ai_category' },
-    { label: '情绪', value: 'ai_sentiment' },
     { label: 'AI处理', value: 'ai_processed' },
     { label: '是否新需求', value: 'is_new_request' },
     { label: '状态', value: 'status' },
@@ -595,7 +647,8 @@ const FeedbackList = () => {
       dateRange: null,
       product: null,
       status: null,
-      isNewRequest: null
+      isNewRequest: null,
+      aiCategory: null
     });
   };
 
@@ -604,8 +657,15 @@ const FeedbackList = () => {
     return [...new Set(feedbackList.map(item => item.product).filter(Boolean))];
   }, [feedbackList]);
 
+  // 获取筛选器的AI分类选项（从现有反馈列表中提取）
+  const filterAiCategoryOptions = useMemo(() => {
+    return [...new Set(feedbackList.map(item => item.ai_category).filter(Boolean))];
+  }, [feedbackList]);
+
   return (
-    <div style={{ padding: '24px' }}>
+    <>
+      <style>{styles}</style>
+      <div style={{ padding: '24px' }}>
       <Card style={{ marginBottom: 16 }}>
         <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', alignItems: 'center' }}>
           <Input
@@ -651,6 +711,18 @@ const FeedbackList = () => {
               { label: '新需求', value: true },
               { label: '已知需求', value: false }
             ]}
+          />
+          <Select
+            placeholder="AI分类"
+            allowClear
+            showSearch
+            value={filters.aiCategory}
+            onChange={(val) => handleFilterChange('aiCategory', val)}
+            style={{ width: 200 }}
+            options={filterAiCategoryOptions.map(c => ({ label: c, value: c }))}
+            filterOption={(input, option) =>
+              (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
+            }
           />
           <Button onClick={handleResetFilters}>重置</Button>
           <span style={{ color: '#999', fontSize: 13 }}>共 {filteredFeedbackList.length} 条</span>
@@ -728,6 +800,9 @@ const FeedbackList = () => {
               pagination={{
                 showSizeChanger: true,
                 showTotal: (total) => `共 ${total} 条记录`
+              }}
+              rowClassName={(record) => {
+                return record._groupCount >= 2 ? 'highlight-row' : '';
               }}
             />
           )
@@ -824,8 +899,23 @@ const FeedbackList = () => {
             <TextArea rows={4} />
           </Form.Item>
 
-          <Form.Item label="问题类型" name="issue_type">
-            <Input />
+          <Form.Item label="AI分类" name="ai_category">
+            <Select
+              placeholder="请选择AI分类"
+              allowClear
+              showSearch
+              options={filterAiCategoryOptions.map(c => ({ label: c, value: c }))}
+              filterOption={(input, option) =>
+                (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
+              }
+            />
+          </Form.Item>
+
+          <Form.Item label="是否新需求" name="is_new_request">
+            <Select placeholder="请选择">
+              <Select.Option value={true}>新需求</Select.Option>
+              <Select.Option value={false}>已知需求</Select.Option>
+            </Select>
           </Form.Item>
 
           <Form.Item label="人工回复（中文）" name="support_reply">
@@ -943,14 +1033,6 @@ const FeedbackList = () => {
                   {viewingFeedback.ai_category || '-'}
                 </Tag>
               </p>
-              <p><strong>情绪：</strong>
-                <Tag color={
-                  viewingFeedback.ai_sentiment === 'Positive' ? 'green' :
-                  viewingFeedback.ai_sentiment === 'Negative' ? 'red' : 'default'
-                }>
-                  {viewingFeedback.ai_sentiment || '-'}
-                </Tag>
-              </p>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
                 <strong>AI 自动回复（中文）：</strong>
                 <Button
@@ -994,6 +1076,7 @@ const FeedbackList = () => {
         )}
       </Drawer>
     </div>
+    </>
   );
 };
 
