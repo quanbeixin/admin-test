@@ -439,26 +439,6 @@ const FeedbackList = () => {
         </div>
       )
     },
-    {
-      title: '产品',
-      dataIndex: 'product',
-      key: 'product',
-      width: 120
-    },
-    {
-      title: '问题描述',
-      dataIndex: 'user_question',
-      key: 'user_question',
-      width: 250,
-      ellipsis: true
-    },
-    {
-      title: '问题描述（中文）',
-      dataIndex: 'user_question_cn',
-      key: 'user_question_cn',
-      width: 250,
-      ellipsis: true
-    },
      {
       title: 'AI 回复',
       dataIndex: 'ai_reply',
@@ -502,6 +482,66 @@ const FeedbackList = () => {
       )
     },
     {
+      title: '状态',
+      dataIndex: 'status',
+      key: 'status',
+      width: 140,
+      render: (status, record) => {
+        const statusMap = {
+          'pending': '待处理',
+          'processed': '已处理'
+        };
+
+        return (
+          <Select
+            value={status}
+            onChange={(newStatus) => {
+              if (newStatus === status) return;
+
+              Modal.confirm({
+                title: '确认修改状态',
+                content: `确定要将状态从"${statusMap[status]}"改为"${statusMap[newStatus]}"吗？`,
+                okText: '确认',
+                cancelText: '取消',
+                onOk: () => {
+                  handleStatusChange(record, newStatus);
+                }
+              });
+            }}
+            style={{ width: '100%' }}
+            size="small"
+          >
+            <Select.Option value="pending">
+              <Tag color="orange" style={{ margin: 0 }}>待处理</Tag>
+            </Select.Option>
+            <Select.Option value="processed">
+              <Tag color="green" style={{ margin: 0 }}>已处理</Tag>
+            </Select.Option>
+          </Select>
+        );
+      }
+    },
+    {
+      title: '产品',
+      dataIndex: 'product',
+      key: 'product',
+      width: 120
+    },
+    {
+      title: '问题描述（中文）',
+      dataIndex: 'user_question_cn',
+      key: 'user_question_cn',
+      width: 250,
+      ellipsis: true
+    },
+    {
+      title: '问题描述',
+      dataIndex: 'user_question',
+      key: 'user_question',
+      width: 250,
+      ellipsis: true
+    },
+    {
       title: 'AI分类',
       dataIndex: 'ai_category',
       key: 'ai_category',
@@ -537,31 +577,6 @@ const FeedbackList = () => {
           {isNew ? '新需求' : '已知需求'}
         </Tag>
       )
-    },
-    {
-      title: '状态',
-      dataIndex: 'status',
-      key: 'status',
-      width: 120,
-      render: (status, record) => {
-        const statusMap = {
-          'pending': { text: '待处理', color: 'orange' },
-          'processed': { text: '已处理', color: 'green' }
-        };
-        const statusInfo = statusMap[status] || { text: status, color: 'default' };
-        return (
-          <Tag
-            color={statusInfo.color}
-            style={{ cursor: 'pointer' }}
-            onClick={() => {
-              const newStatus = status === 'pending' ? 'processed' : 'pending';
-              handleStatusChange(record, newStatus);
-            }}
-          >
-            {statusInfo.text}
-          </Tag>
-        );
-      }
     },
     {
       title: '操作',
