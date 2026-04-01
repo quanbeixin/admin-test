@@ -1,4 +1,4 @@
-import { Table, Button, Space, Tag, message, Modal, Form, Input, Select, DatePicker, Drawer, Tabs, Upload, Dropdown, Card } from 'antd';
+import { Table, Button, Space, Tag, message, Modal, Form, Input, Select, DatePicker, Drawer, Tabs, Upload, Dropdown, Card, Tooltip } from 'antd';
 import { EyeOutlined, EditOutlined, DeleteOutlined, CheckOutlined, RobotOutlined, ThunderboltOutlined, CopyOutlined, UploadOutlined, SettingOutlined, SearchOutlined } from '@ant-design/icons';
 import { useState, useEffect, useMemo } from 'react';
 import dayjs from 'dayjs';
@@ -34,11 +34,14 @@ const FeedbackList = () => {
   const [viewingFeedback, setViewingFeedback] = useState(null);
   const [activeTab, setActiveTab] = useState('all');
   const [productOptions, setProductOptions] = useState([]);
-  const [visibleColumns, setVisibleColumns] = useState([
-    'date', 'user_email', 'product', 'user_question', 'user_question_cn',
-    'ai_reply', 'ai_reply_en', 'ai_category', 'ai_processed',
-    'is_new_request', 'status', 'action'
-  ]);
+  const [visibleColumns, setVisibleColumns] = useState(() => {
+    const saved = localStorage.getItem('feedbackListVisibleColumns');
+    return saved ? JSON.parse(saved) : [
+      'date', 'user_question_cn', 'ai_category', 'ai_reply', 'ai_reply_en',
+      'user_email', 'status', 'product', 'is_new_request', 'user_question',
+      'ai_processed', 'action'
+    ];
+  });
   const [filters, setFilters] = useState({
     searchText: '',
     dateRange: null,
@@ -54,6 +57,10 @@ const FeedbackList = () => {
     fetchFeedback();
     fetchProductOptions();
   }, []);
+
+  useEffect(() => {
+    localStorage.setItem('feedbackListVisibleColumns', JSON.stringify(visibleColumns));
+  }, [visibleColumns]);
 
   // 获取所有产品列表和分组数据
   const { productTabs, filteredFeedbackList } = useMemo(() => {
@@ -112,26 +119,8 @@ const FeedbackList = () => {
       filtered = filtered.filter(item => item.ai_category === filters.aiCategory);
     }
 
-    // 排序：按日期（天）和邮箱分组，让同一天内相同邮箱的反馈紧挨着显示
-    filtered.sort((a, b) => {
-      const dateA = dayjs(a.date).format('YYYY-MM-DD');
-      const dateB = dayjs(b.date).format('YYYY-MM-DD');
-      const emailA = a.user_email || '';
-      const emailB = b.user_email || '';
-
-      // 先按日期降序（最新的在前）
-      if (dateA !== dateB) {
-        return dateB.localeCompare(dateA);
-      }
-
-      // 同一天内按邮箱排序
-      if (emailA !== emailB) {
-        return emailA.localeCompare(emailB);
-      }
-
-      // 同一天同一邮箱内按时间降序
-      return dayjs(b.date).valueOf() - dayjs(a.date).valueOf();
-    });
+    // 排序：按时间降序（最新的在前）
+    filtered.sort((a, b) => dayjs(b.date).valueOf() - dayjs(a.date).valueOf());
 
     // 计算每个分组的数量（同一天+同一邮箱）
     const groupCounts = {};
@@ -419,27 +408,33 @@ const FeedbackList = () => {
       render: (date) => date ? dayjs(date).format('YYYY-MM-DD HH:mm') : '-'
     },
     {
-      title: '用户邮箱',
-      dataIndex: 'user_email',
-      key: 'user_email',
-      width: 200,
+      title: '问题描述（中文）',
+      dataIndex: 'user_question_cn',
+      key: 'user_question_cn',
+      width: 250,
       ellipsis: true,
       render: (text) => (
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          <span style={{ flex: 1, overflow: 'hidden', textOverflow: 'ellipsis' }}>{text || '-'}</span>
-          {text && (
-            <Button
-              type="text"
-              size="small"
-              icon={<CopyOutlined />}
-              onClick={() => handleCopy(text, '用户邮箱')}
-              style={{ flexShrink: 0 }}
-            />
-          )}
-        </div>
+        <Tooltip title={text} overlayStyle={{ maxWidth: 400 }} placement="topLeft">
+          <span style={{ display: 'block', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', cursor: text ? 'pointer' : 'default' }}>{text || '-'}</span>
+        </Tooltip>
       )
     },
-     {
+    {
+      title: 'AI分类',
+      dataIndex: 'ai_category',
+      key: 'ai_category',
+      width: 120,
+      render: (category) => {
+        const colorMap = {
+          'Bug': 'red',
+          '功能需求': 'blue',
+          '投诉': 'orange',
+          '咨询': 'green'
+        };
+        return category ? <Tag color={colorMap[category] || 'default'}>{category}</Tag> : '-';
+      }
+    },
+    {
       title: 'AI 回复',
       dataIndex: 'ai_reply',
       key: 'ai_reply',
@@ -447,7 +442,9 @@ const FeedbackList = () => {
       ellipsis: true,
       render: (text) => (
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          <span style={{ flex: 1, overflow: 'hidden', textOverflow: 'ellipsis' }}>{text || '-'}</span>
+          <Tooltip title={text} overlayStyle={{ maxWidth: 400 }} placement="topLeft">
+            <span style={{ flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', cursor: text ? 'pointer' : 'default' }}>{text || '-'}</span>
+          </Tooltip>
           {text && (
             <Button
               type="text"
@@ -475,6 +472,27 @@ const FeedbackList = () => {
               size="small"
               icon={<CopyOutlined />}
               onClick={() => handleCopy(text, 'AI 转英文')}
+              style={{ flexShrink: 0 }}
+            />
+          )}
+        </div>
+      )
+    },
+    {
+      title: '用户邮箱',
+      dataIndex: 'user_email',
+      key: 'user_email',
+      width: 200,
+      ellipsis: true,
+      render: (text) => (
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <span style={{ flex: 1, overflow: 'hidden', textOverflow: 'ellipsis' }}>{text || '-'}</span>
+          {text && (
+            <Button
+              type="text"
+              size="small"
+              icon={<CopyOutlined />}
+              onClick={() => handleCopy(text, '用户邮箱')}
               style={{ flexShrink: 0 }}
             />
           )}
@@ -528,33 +546,27 @@ const FeedbackList = () => {
       width: 120
     },
     {
-      title: '问题描述（中文）',
-      dataIndex: 'user_question_cn',
-      key: 'user_question_cn',
-      width: 250,
-      ellipsis: true
+      title: '是否新需求',
+      dataIndex: 'is_new_request',
+      key: 'is_new_request',
+      width: 120,
+      render: (isNew) => (
+        <Tag color={isNew ? 'red' : 'blue'}>
+          {isNew ? '新需求' : '已知需求'}
+        </Tag>
+      )
     },
     {
       title: '问题描述',
       dataIndex: 'user_question',
       key: 'user_question',
       width: 250,
-      ellipsis: true
-    },
-    {
-      title: 'AI分类',
-      dataIndex: 'ai_category',
-      key: 'ai_category',
-      width: 120,
-      render: (category) => {
-        const colorMap = {
-          'Bug': 'red',
-          '功能需求': 'blue',
-          '投诉': 'orange',
-          '咨询': 'green'
-        };
-        return category ? <Tag color={colorMap[category] || 'default'}>{category}</Tag> : '-';
-      }
+      ellipsis: true,
+      render: (text) => (
+        <Tooltip title={text} overlayStyle={{ maxWidth: 400 }} placement="topLeft">
+          <span style={{ display: 'block', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', cursor: text ? 'pointer' : 'default' }}>{text || '-'}</span>
+        </Tooltip>
+      )
     },
     {
       title: 'AI处理',
@@ -564,17 +576,6 @@ const FeedbackList = () => {
       render: (processed) => (
         <Tag color={processed ? 'green' : 'default'}>
           {processed ? '已处理' : '未处理'}
-        </Tag>
-      )
-    },
-    {
-      title: '是否新需求',
-      dataIndex: 'is_new_request',
-      key: 'is_new_request',
-      width: 120,
-      render: (isNew) => (
-        <Tag color={isNew ? 'red' : 'blue'}>
-          {isNew ? '新需求' : '已知需求'}
         </Tag>
       )
     },
