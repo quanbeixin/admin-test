@@ -34,6 +34,11 @@ const FeedbackList = () => {
   const [viewingFeedback, setViewingFeedback] = useState(null);
   const [activeTab, setActiveTab] = useState('all');
   const [productOptions, setProductOptions] = useState([]);
+  const [pagination, setPagination] = useState({
+    current: 1,
+    pageSize: 20,
+    total: 0
+  });
   const [visibleColumns, setVisibleColumns] = useState(() => {
     const saved = localStorage.getItem('feedbackListVisibleColumns');
     return saved ? JSON.parse(saved) : [
@@ -45,7 +50,6 @@ const FeedbackList = () => {
   const [filters, setFilters] = useState({
     searchText: '',
     dateRange: null,
-    product: null,
     status: null,
     isNewRequest: null,
     aiCategory: null
@@ -54,7 +58,6 @@ const FeedbackList = () => {
   const [mockForm] = Form.useForm();
 
   useEffect(() => {
-    fetchFeedback();
     fetchProductOptions();
   }, []);
 
@@ -62,91 +65,80 @@ const FeedbackList = () => {
     localStorage.setItem('feedbackListVisibleColumns', JSON.stringify(visibleColumns));
   }, [visibleColumns]);
 
-  // 获取所有产品列表和分组数据
-  const { productTabs, filteredFeedbackList } = useMemo(() => {
-    const products = [...new Set(feedbackList.map(item => item.product).filter(Boolean))];
-    const tabs = [
-      { key: 'all', label: '全部', count: feedbackList.length }
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      fetchFeedback();
+    }, filters.searchText ? 300 : 0);
+
+    return () => clearTimeout(timer);
+  }, [
+    activeTab,
+    pagination.current,
+    pagination.pageSize,
+    filters.searchText,
+    filters.dateRange,
+    filters.status,
+    filters.isNewRequest,
+    filters.aiCategory
+  ]);
+
+  const productTabs = useMemo(() => {
+    const products = [...new Set([
+      ...productOptions.map(option => option.value),
+      ...feedbackList.map(item => item.product)
+    ].filter(Boolean))];
+
+    return [
+      { key: 'all', label: '全部' },
+      ...products.map(product => ({
+        key: product,
+        label: product
+      }))
     ];
+  }, [feedbackList, productOptions]);
 
-    products.forEach(product => {
-      const count = feedbackList.filter(item => item.product === product).length;
-      tabs.push({ key: product, label: product, count });
-    });
-
-    // 先按 tab 过滤
-    let filtered = activeTab === 'all'
-      ? feedbackList
-      : feedbackList.filter(item => item.product === activeTab);
-
-    // 搜索过滤
-    if (filters.searchText) {
-      const searchLower = filters.searchText.toLowerCase();
-      filtered = filtered.filter(item => {
-        return (
-          (item.user_email && item.user_email.toLowerCase().includes(searchLower)) ||
-          (item.user_question && item.user_question.toLowerCase().includes(searchLower)) ||
-          (item.user_question_cn && item.user_question_cn.toLowerCase().includes(searchLower)) ||
-          (item.ai_reply && item.ai_reply.toLowerCase().includes(searchLower)) ||
-          (item.ai_reply_en && item.ai_reply_en.toLowerCase().includes(searchLower)) ||
-          (item.product && item.product.toLowerCase().includes(searchLower)) ||
-          (item.ai_category && item.ai_category.toLowerCase().includes(searchLower))
-        );
-      });
-    }
-
-    // 再应用筛选条件
-    if (filters.dateRange && filters.dateRange.length === 2) {
-      filtered = filtered.filter(item => {
-        const itemDate = dayjs(item.date);
-        return itemDate.isAfter(filters.dateRange[0]) && itemDate.isBefore(filters.dateRange[1]);
-      });
-    }
-
-    if (filters.product) {
-      filtered = filtered.filter(item => item.product === filters.product);
-    }
-
-    if (filters.status) {
-      filtered = filtered.filter(item => item.status === filters.status);
-    }
-
-    if (filters.isNewRequest !== null) {
-      filtered = filtered.filter(item => item.is_new_request === filters.isNewRequest);
-    }
-
-    if (filters.aiCategory) {
-      filtered = filtered.filter(item => item.ai_category === filters.aiCategory);
-    }
-
-    // 排序：按时间降序（最新的在前）
-    filtered.sort((a, b) => dayjs(b.date).valueOf() - dayjs(a.date).valueOf());
-
-    // 计算每个分组的数量（同一天+同一邮箱）
+  const pagedFeedbackList = useMemo(() => {
     const groupCounts = {};
-    filtered.forEach(item => {
+
+    feedbackList.forEach(item => {
       const date = dayjs(item.date).format('YYYY-MM-DD');
       const email = item.user_email || '';
       const groupKey = `${date}_${email}`;
       groupCounts[groupKey] = (groupCounts[groupKey] || 0) + 1;
     });
 
-    // 为每条数据添加分组信息
-    const filteredWithGroup = filtered.map(item => ({
+    return feedbackList.map(item => ({
       ...item,
       _groupKey: `${dayjs(item.date).format('YYYY-MM-DD')}_${item.user_email || ''}`,
       _groupCount: groupCounts[`${dayjs(item.date).format('YYYY-MM-DD')}_${item.user_email || ''}`]
     }));
+  }, [feedbackList]);
 
-    return { productTabs: tabs, filteredFeedbackList: filteredWithGroup };
-  }, [feedbackList, activeTab, filters]);
-
-  const fetchFeedback = async () => {
+  const fetchFeedback = async (overrides = {}) => {
     setLoading(true);
     try {
-      const response = await getAllFeedback();
-      const data = response.data || response;
+      const current = overrides.page || pagination.current;
+      const pageSize = overrides.pageSize || pagination.pageSize;
+      const response = await getAllFeedback({
+        page: current,
+        pageSize,
+        searchText: filters.searchText || undefined,
+        product: activeTab !== 'all' ? activeTab : undefined,
+        status: filters.status || undefined,
+        isNewRequest: filters.isNewRequest,
+        aiCategory: filters.aiCategory || undefined,
+        dateStart: filters.dateRange?.[0] ? filters.dateRange[0].startOf('day').format('YYYY-MM-DD HH:mm:ss') : undefined,
+        dateEnd: filters.dateRange?.[1] ? filters.dateRange[1].endOf('day').format('YYYY-MM-DD HH:mm:ss') : undefined
+      });
+      const data = response.data || [];
+      const paginationData = response.pagination || {};
+
       setFeedbackList(Array.isArray(data) ? data : []);
+      setPagination(prev => ({
+        current: paginationData.page || current,
+        pageSize: paginationData.pageSize || pageSize,
+        total: paginationData.total || 0
+      }));
     } catch (error) {
       message.error('获取反馈列表失败');
       console.error('获取反馈列表失败:', error);
@@ -194,7 +186,8 @@ const FeedbackList = () => {
       message.success('模拟数据插入成功');
       setIsMockModalOpen(false);
       mockForm.resetFields();
-      fetchFeedback();
+      setPagination(prev => ({ ...prev, current: 1 }));
+      fetchFeedback({ page: 1 });
     } catch (error) {
       if (error?.errorFields) {
         return;
@@ -366,7 +359,8 @@ const FeedbackList = () => {
       message.success(`成功导入 ${data.length} 条数据`);
       setIsImportModalOpen(false);
       setFileList([]);
-      fetchFeedback();
+      setPagination(prev => ({ ...prev, current: 1 }));
+      fetchFeedback({ page: 1 });
     } catch (error) {
       message.error('批量导入失败');
       console.error('批量导入失败:', error);
@@ -654,29 +648,50 @@ const FeedbackList = () => {
   };
 
   const handleFilterChange = (key, value) => {
+    setPagination(prev => ({ ...prev, current: 1 }));
     setFilters(prev => ({ ...prev, [key]: value }));
   };
 
   const handleResetFilters = () => {
+    setActiveTab('all');
+    setPagination(prev => ({ ...prev, current: 1 }));
     setFilters({
       searchText: '',
       dateRange: null,
-      product: null,
       status: null,
       isNewRequest: null,
       aiCategory: null
     });
   };
 
-  // 获取筛选器的产品选项（从现有反馈列表中提取）
   const filterProductOptions = useMemo(() => {
-    return [...new Set(feedbackList.map(item => item.product).filter(Boolean))];
-  }, [feedbackList]);
+    return [...new Set([
+      ...productOptions.map(option => option.value),
+      ...feedbackList.map(item => item.product)
+    ].filter(Boolean))];
+  }, [feedbackList, productOptions]);
 
-  // 获取筛选器的AI分类选项（从现有反馈列表中提取）
   const filterAiCategoryOptions = useMemo(() => {
     return [...new Set(feedbackList.map(item => item.ai_category).filter(Boolean))];
   }, [feedbackList]);
+
+  const handleTabChange = (key) => {
+    setActiveTab(key);
+    setPagination(prev => ({ ...prev, current: 1 }));
+  };
+
+  const handleProductFilterChange = (value) => {
+    setActiveTab(value || 'all');
+    setPagination(prev => ({ ...prev, current: 1 }));
+  };
+
+  const handleTableChange = (pager) => {
+    setPagination(prev => ({
+      ...prev,
+      current: pager.current,
+      pageSize: pager.pageSize
+    }));
+  };
 
   return (
     <>
@@ -701,8 +716,8 @@ const FeedbackList = () => {
           <Select
             placeholder="产品"
             allowClear
-            value={filters.product}
-            onChange={(val) => handleFilterChange('product', val)}
+            value={activeTab === 'all' ? undefined : activeTab}
+            onChange={handleProductFilterChange}
             style={{ width: 150 }}
             options={filterProductOptions.map(p => ({ label: p, value: p }))}
           />
@@ -741,7 +756,7 @@ const FeedbackList = () => {
             }
           />
           <Button onClick={handleResetFilters}>重置</Button>
-          <span style={{ color: '#999', fontSize: 13 }}>共 {filteredFeedbackList.length} 条</span>
+          <span style={{ color: '#999', fontSize: 13 }}>共 {pagination.total} 条</span>
         </div>
       </Card>
       <div style={{ marginBottom: 16, display: 'flex', justifyContent: 'flex-end', gap: 8 }}>
@@ -802,21 +817,26 @@ const FeedbackList = () => {
 
       <Tabs
         activeKey={activeTab}
-        onChange={setActiveTab}
+        onChange={handleTabChange}
         items={productTabs.map(tab => ({
           key: tab.key,
-          label: `${tab.label} (${tab.count})`,
+          label: tab.label,
           children: (
             <Table
               columns={columns}
-              dataSource={filteredFeedbackList}
+              dataSource={pagedFeedbackList}
               rowKey="id"
               loading={loading}
               scroll={{ x: 1500 }}
               pagination={{
+                current: pagination.current,
+                pageSize: pagination.pageSize,
+                total: pagination.total,
                 showSizeChanger: true,
+                pageSizeOptions: ['20', '50', '100'],
                 showTotal: (total) => `共 ${total} 条记录`
               }}
+              onChange={handleTableChange}
               rowClassName={(record) => {
                 return record._groupCount >= 2 ? 'highlight-row' : '';
               }}

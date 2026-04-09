@@ -1,10 +1,11 @@
 import request from './request';
 
 // 获取所有反馈
-export const getAllFeedback = () => {
+export const getAllFeedback = (params) => {
   return request({
     url: '/feedback',
-    method: 'get'
+    method: 'get',
+    params
   });
 };
 
